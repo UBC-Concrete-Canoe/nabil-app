@@ -3,6 +3,10 @@ project(coco)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 # Find Packages
 find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(OpenCASCADE REQUIRED)
@@ -30,4 +34,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
     # VTK
     ${VTK_LIBRARIES}
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCASCADE_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
+
+vtk_module_autoinit(
+    TARGETS ${PROJECT_NAME}
+    MODULES ${VTK_LIBRARIES}
 )
