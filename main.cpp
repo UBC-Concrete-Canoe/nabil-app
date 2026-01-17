@@ -1,3 +1,85 @@
+#include <QApplication>
+#include <QWidget>
+#include <QHBoxLayout>
+
+// OCCT includes
+#include <AIS_InteractiveContext.hxx>
+#include <V3d_Viewer.hxx>
+#include <V3d_View.hxx>
+#include <Graphic3d_GraphicDriver.hxx>
+#include <OpenGl_GraphicDriver.hxx>
+#include <WNT_Window.hxx>
+#include <AIS_Shape.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+
+// VTK includes
+#include <QVTKOpenGLNativeWidget.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkCubeSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+
+int main(int argc, char **argv)
+{
+    QApplication app(argc, argv);
+
+    // Main Qt window
+    QWidget window;
+    window.setWindowTitle("OCCT + VTK Test");
+    window.resize(800, 400);
+
+    // Layout to hold OCCT and VTK widgets
+    QHBoxLayout *layout = new QHBoxLayout(&window);
+
+    // ---------- OCCT Widget ----------
+    QWidget *occtWidget = new QWidget();
+    occtWidget->setMinimumSize(400, 400);
+    layout->addWidget(occtWidget);
+
+    // Create OCCT viewer and context
+    Handle(Aspect_DisplayConnection) disp = new Aspect_DisplayConnection();
+    Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(disp);
+    Handle(V3d_Viewer) viewer = new V3d_Viewer(graphicDriver);
+    Handle(V3d_View) view = viewer->CreateView();
+
+    // Attach OCCT view to QWidget using native handle
+    Aspect_Handle winId = (Aspect_Handle)occtWidget->winId();
+    Handle(WNT_Window) occtWindow = new WNT_Window(winId);
+    view->SetWindow(occtWindow);
+    view->TriedronDisplay(Aspect_TOTP_LEFT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
+
+    Handle(AIS_InteractiveContext) context = new AIS_InteractiveContext(viewer);
+
+    // Add a box
+    TopoDS_Shape box = BRepPrimAPI_MakeBox(100, 100, 100).Shape();
+    Handle(AIS_Shape) aisBox = new AIS_Shape(box);
+    context->Display(aisBox, Standard_True);
+    view->FitAll();
+
+    // ---------- VTK Widget ----------
+    QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget();
+    layout->addWidget(vtkWidget);
+
+    vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
+    vtkWidget->setRenderWindow(renderWindow);
+
+    vtkNew<vtkRenderer> renderer;
+    renderWindow->AddRenderer(renderer);
+
+    // VTK cube
+    vtkNew<vtkCubeSource> cube;
+    vtkNew<vtkPolyDataMapper> mapper;
+    mapper->SetInputConnection(cube->GetOutputPort());
+    vtkNew<vtkActor> actor;
+    actor->SetMapper(mapper);
+    renderer->AddActor(actor);
+    renderer->ResetCamera();
+
+    window.show();
+    return app.exec();
+}
+
 // VTK SOLO TEST
 // #include <vtkSmartPointer.h>
 // #include <vtkCubeSource.h>
