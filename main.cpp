@@ -1,16 +1,17 @@
 #include <QApplication>
 #include <QWidget>
 #include <QHBoxLayout>
+#include <QTimer>
 
 // OCCT includes
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
 #include <V3d_View.hxx>
-#include <Graphic3d_GraphicDriver.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 #include <WNT_Window.hxx>
 #include <AIS_Shape.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <Aspect_DisplayConnection.hxx>
 
 // VTK includes
 #include <QVTKOpenGLNativeWidget.h>
@@ -20,44 +21,77 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 
+class OcctWidget : public QWidget
+{
+public:
+    OcctWidget(QWidget *parent = nullptr)
+        : QWidget(parent)
+    {
+        setAttribute(Qt::WA_OpaquePaintEvent);
+        setAttribute(Qt::WA_NoSystemBackground);
+
+        // Create OCCT viewer
+        Handle(Aspect_DisplayConnection) disp = new Aspect_DisplayConnection();
+        Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(disp);
+        viewer = new V3d_Viewer(graphicDriver);
+
+        // Create interactive context
+        context = new AIS_InteractiveContext(viewer);
+
+        // Create OCCT view
+        view = viewer->CreateView();
+
+        // Attach to this QWidget
+        Handle(WNT_Window) occtWindow = new WNT_Window((Aspect_Handle)winId());
+        view->SetWindow(occtWindow);
+
+        // Enable default lights
+        viewer->SetDefaultLights();
+        viewer->SetLightOn();
+
+        // Add a box
+        TopoDS_Shape box = BRepPrimAPI_MakeBox(100, 100, 100).Shape();
+        Handle(AIS_Shape) aisBox = new AIS_Shape(box);
+        context->Display(aisBox, Standard_True);
+
+        view->FitAll();
+
+        // Timer to update OCCT view
+        QTimer *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, [this]()
+                { view->Redraw(); });
+        timer->start(16); // ~60 FPS
+    }
+
+protected:
+    void resizeEvent(QResizeEvent *event) override
+    {
+        QWidget::resizeEvent(event);
+        if (!view.IsNull())
+            view->MustBeResized();
+    }
+
+private:
+    Handle(V3d_Viewer) viewer;
+    Handle(V3d_View) view;
+    Handle(AIS_InteractiveContext) context;
+};
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    // Main Qt window
     QWidget window;
     window.setWindowTitle("OCCT + VTK Test");
     window.resize(800, 400);
-
-    // Layout to hold OCCT and VTK widgets
     QHBoxLayout *layout = new QHBoxLayout(&window);
 
-    // ---------- OCCT Widget ----------
-    QWidget *occtWidget = new QWidget();
+    // OCCT widget
+    OcctWidget *occtWidget = new OcctWidget();
     occtWidget->setMinimumSize(400, 400);
     layout->addWidget(occtWidget);
 
-    // Create OCCT viewer and context
-    Handle(Aspect_DisplayConnection) disp = new Aspect_DisplayConnection();
-    Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(disp);
-    Handle(V3d_Viewer) viewer = new V3d_Viewer(graphicDriver);
-    Handle(V3d_View) view = viewer->CreateView();
-
-    // Attach OCCT view to QWidget using native handle
-    Aspect_Handle winId = (Aspect_Handle)occtWidget->winId();
-    Handle(WNT_Window) occtWindow = new WNT_Window(winId);
-    view->SetWindow(occtWindow);
-    view->TriedronDisplay(Aspect_TOTP_LEFT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
-
-    Handle(AIS_InteractiveContext) context = new AIS_InteractiveContext(viewer);
-
-    // Add a box
-    TopoDS_Shape box = BRepPrimAPI_MakeBox(100, 100, 100).Shape();
-    Handle(AIS_Shape) aisBox = new AIS_Shape(box);
-    context->Display(aisBox, Standard_True);
-    view->FitAll();
-
-    // ---------- VTK Widget ----------
+    // VTK widget
     QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget();
     layout->addWidget(vtkWidget);
 
@@ -67,7 +101,6 @@ int main(int argc, char **argv)
     vtkNew<vtkRenderer> renderer;
     renderWindow->AddRenderer(renderer);
 
-    // VTK cube
     vtkNew<vtkCubeSource> cube;
     vtkNew<vtkPolyDataMapper> mapper;
     mapper->SetInputConnection(cube->GetOutputPort());
