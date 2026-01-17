@@ -2,21 +2,36 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "ninja-vcpkg",
+      "name": "ninja-vcpkg-release",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build/release",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "C:/VCPKG/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
         "VCPKG_FEATURE_FLAGS": "manifests",
         "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ninja-vcpkg-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_FEATURE_FLAGS": "manifests",
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "ninja-vcpkg",
-      "configurePreset": "ninja-vcpkg"
+      "name": "build-release",
+      "configurePreset": "ninja-vcpkg-release",
+      "description": "Builds project in release mode"
+    },
+    {
+      "name": "build-debug",
+      "configurePreset": "ninja-vcpkg-debug",
+      "description": "Builds project in debug mode"
     }
   ]
 }
