@@ -1,106 +1,137 @@
 #include <QApplication>
 #include <QWidget>
 #include <QHBoxLayout>
-#include <QTimer>
+#include <QMouseEvent>
 
-// OCCT includes
+// --- OCCT Includes ---
 #include <AIS_InteractiveContext.hxx>
-#include <V3d_Viewer.hxx>
-#include <V3d_View.hxx>
-#include <OpenGl_GraphicDriver.hxx>
-#include <WNT_Window.hxx>
 #include <AIS_Shape.hxx>
-#include <BRepPrimAPI_MakeBox.hxx>
 #include <Aspect_DisplayConnection.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <OpenGl_GraphicDriver.hxx>
+#include <V3d_View.hxx>
+#include <V3d_Viewer.hxx>
 
-// VTK includes
+#ifdef _WIN32
+#include <WNT_Window.hxx>
+#else
+#include <Xw_Window.hxx>
+#endif
+
+// --- VTK Includes ---
 #include <QVTKOpenGLNativeWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkCubeSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkNew.h>
 
+// --- OCCT Widget Implementation ---
 class OcctWidget : public QWidget
 {
+    Q_OBJECT
 public:
-    OcctWidget(QWidget *parent = nullptr)
-        : QWidget(parent)
+    OcctWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
-        setAttribute(Qt::WA_OpaquePaintEvent);
+        setAttribute(Qt::WA_NativeWindow);
+        setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
+        setMouseTracking(true);
 
-        // Create OCCT viewer
         Handle(Aspect_DisplayConnection) disp = new Aspect_DisplayConnection();
-        Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(disp);
-        viewer = new V3d_Viewer(graphicDriver);
-
-        // Create interactive context
-        context = new AIS_InteractiveContext(viewer);
-
-        // Create OCCT view
-        view = viewer->CreateView();
-
-        // Attach to this QWidget
-        Handle(WNT_Window) occtWindow = new WNT_Window((Aspect_Handle)winId());
-        view->SetWindow(occtWindow);
-
-        // Enable default lights
+        Handle(OpenGl_GraphicDriver) driver = new OpenGl_GraphicDriver(disp);
+        viewer = new V3d_Viewer(driver);
         viewer->SetDefaultLights();
         viewer->SetLightOn();
+        context = new AIS_InteractiveContext(viewer);
+        view = viewer->CreateView();
 
-        // Add a box
+#ifdef _WIN32
+        Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)winId());
+#else
+        Handle(Xw_Window) wind = new Xw_Window(disp, (Window)winId());
+#endif
+        view->SetWindow(wind);
+        if (!wind->IsMapped())
+            wind->Map();
+
+        view->SetBackgroundColor(Quantity_NOC_BLACK);
+
+        // Add a Box to OCCT
         TopoDS_Shape box = BRepPrimAPI_MakeBox(100, 100, 100).Shape();
         Handle(AIS_Shape) aisBox = new AIS_Shape(box);
         context->Display(aisBox, Standard_True);
-
-        view->FitAll();
-
-        // Timer to update OCCT view
-        QTimer *timer = new QTimer(this);
-        connect(timer, &QTimer::timeout, this, [this]()
-                { view->Redraw(); });
-        timer->start(16); // ~60 FPS
     }
 
+    QPaintEngine *paintEngine() const override { return nullptr; }
+
 protected:
-    void resizeEvent(QResizeEvent *event) override
+    void paintEvent(QPaintEvent *) override { view->Redraw(); }
+    void resizeEvent(QResizeEvent *) override
     {
-        QWidget::resizeEvent(event);
         if (!view.IsNull())
             view->MustBeResized();
     }
 
+    void mousePressEvent(QMouseEvent *e) override
+    {
+        lastPos = e->pos();
+        if (e->button() == Qt::LeftButton)
+            view->StartRotation(e->x(), e->y());
+    }
+
+    void mouseMoveEvent(QMouseEvent *e) override
+    {
+        if (e->buttons() & Qt::LeftButton)
+            view->Rotation(e->x(), e->y());
+        else if (e->buttons() & Qt::RightButton)
+        {
+            view->Pan(e->pos().x() - lastPos.x(), lastPos.y() - e->pos().y());
+            lastPos = e->pos();
+        }
+        view->Redraw();
+    }
+
 private:
     Handle(V3d_Viewer) viewer;
-    Handle(V3d_View) view;
     Handle(AIS_InteractiveContext) context;
+    Handle(V3d_View) view;
+    QPoint lastPos;
 };
 
+// --- Main Application ---
 int main(int argc, char **argv)
 {
+    // Necessary for some VTK/Qt versions to handle OpenGL initialization
+    QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
+
     QApplication app(argc, argv);
 
     QWidget window;
-    window.setWindowTitle("OCCT + VTK Test");
-    window.resize(800, 400);
-    QHBoxLayout *layout = new QHBoxLayout(&window);
+    window.setWindowTitle("OCCT (Left) vs VTK (Right)");
+    window.resize(1000, 500);
 
-    // OCCT widget
-    OcctWidget *occtWidget = new OcctWidget();
-    occtWidget->setMinimumSize(400, 400);
+    QHBoxLayout *layout = new QHBoxLayout(&window);
+    layout->setSpacing(2); // Small gap between viewers
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    // 1. Setup OCCT (Left Side)
+    OcctWidget *occtWidget = new OcctWidget(&window);
     layout->addWidget(occtWidget);
 
-    // VTK widget
-    QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget();
+    // 2. Setup VTK (Right Side)
+    QVTKOpenGLNativeWidget *vtkWidget = new QVTKOpenGLNativeWidget(&window);
     layout->addWidget(vtkWidget);
 
     vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
     vtkWidget->setRenderWindow(renderWindow);
 
     vtkNew<vtkRenderer> renderer;
+    renderer->SetBackground(0.1, 0.2, 0.3); // Dark blue background for VTK
     renderWindow->AddRenderer(renderer);
 
+    // Add a Cube to VTK
     vtkNew<vtkCubeSource> cube;
     vtkNew<vtkPolyDataMapper> mapper;
     mapper->SetInputConnection(cube->GetOutputPort());
@@ -112,6 +143,8 @@ int main(int argc, char **argv)
     window.show();
     return app.exec();
 }
+
+#include "main.moc"
 
 // VTK SOLO TEST
 // #include <vtkSmartPointer.h>
