@@ -58,10 +58,18 @@ public:
 
         view->SetBackgroundColor(Quantity_NOC_BLACK);
 
-        // Add a Box to OCCT
-        TopoDS_Shape box = BRepPrimAPI_MakeBox(100, 100, 100).Shape();
+        // 1. Create a larger box (or keep 100, just fit the camera)
+        TopoDS_Shape box = BRepPrimAPI_MakeBox(100.0, 100.0, 100.0).Shape();
         Handle(AIS_Shape) aisBox = new AIS_Shape(box);
-        context->Display(aisBox, Standard_True);
+
+        // 2. Display the box
+        context->Display(aisBox, Standard_False); // Standard_False means don't redraw yet
+
+        // 3. CRITICAL: Fit the camera to the object
+        view->FitAll();
+
+        // 4. Now perform the final redraw
+        view->Redraw();
     }
 
     QPaintEngine *paintEngine() const override { return nullptr; }
