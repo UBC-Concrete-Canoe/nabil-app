@@ -3,15 +3,20 @@
   "configurePresets": [
     {
       "name": "ninja-vcpkg",
-      "displayName": "Ninja + vcpkg",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "C:/VCPKG/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "CMAKE_PREFIX_PATH": "${sourceDir}/build/vcpkg_installed/x64-windows",
-        "Qt6_DIR": "${sourceDir}/build/vcpkg_installed/x64-windows/share/qt6"
+        "VCPKG_FEATURE_FLAGS": "manifests",
+        "CMAKE_BUILD_TYPE": "Release"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-vcpkg",
+      "configurePreset": "ninja-vcpkg"
     }
   ]
 }

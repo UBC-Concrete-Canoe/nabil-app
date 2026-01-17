@@ -15,24 +15,21 @@ find_package(VTK REQUIRED)
 add_executable(${PROJECT_NAME} main.cpp)
 
 # Linkage
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    # Qt6
-    Qt6::Widgets 
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt6::Widgets
     Qt6::OpenGLWidgets
 
-    # Open Cascade (OCCT) - These must be in this order
-    TKernel       # Base
-    TKMath        # Math
-    TKG2d         # 2D Geometry
-    TKG3d         # 3D Geometry
-    TKBRep        # Boundary Representation
-    TKTopAlgo     # Topological Algorithms
-    TKPrim        # <--- THIS FIXES THE SPHERE ERROR
-    TKService     # Graphics Services
-    TKV3d         # 3D Viewer
-    TKIVtk        # The Bridge to VTK
-
-    # VTK
+    TKernel
+    TKMath
+    TKG2d
+    TKG3d
+    TKGeomBase
+    TKBRep
+    TKTopAlgo
+    TKPrim
+    TKService
+    TKV3d
+    TKOpenGl
     ${VTK_LIBRARIES}
 )
 

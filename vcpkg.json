@@ -4,15 +4,25 @@
   "dependencies": [
     {
       "name": "opencascade",
-      "features": ["vtk", "freetype"]
-    },
-    {
-      "name": "vtk",
-      "features": ["qt", "opengl"]
+      "features": [
+        "freetype",
+        "vtk"
+      ]
     },
     {
       "name": "qtbase",
-      "features": ["gui", "widgets", "opengl"]
+      "features": [
+        "gui",
+        "opengl",
+        "widgets"
+      ]
+    },
+    {
+      "name": "vtk",
+      "features": [
+        "opengl",
+        "qt"
+      ]
     }
   ]
 }
