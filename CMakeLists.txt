@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(coco)
 
-# set(VCPKG_APPLOCAL_DEPS ON) # Leave off for now, revisit when doing full release packages
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_AUTOMOC ON)
@@ -15,11 +14,21 @@ find_package(VTK REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-# Linkage
+# --- macOS Specific Configuration ---
+if(APPLE)
+    # 1. Force main.cpp to be treated as Objective-C++ to support NSView* casts
+    set_source_files_properties(main.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
+    
+    # 2. Link AppKit (for windowing) and OpenGL (for rendering)
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework OpenGL")
+endif()
+
+# --- General Linkage ---
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Widgets
     Qt6::OpenGLWidgets
 
+    # OCCT Libraries
     TKernel
     TKMath
     TKG2d
@@ -31,38 +40,35 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     TKService
     TKV3d
     TKOpenGl
+    
+    # VTK Libraries
     ${VTK_LIBRARIES}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCASCADE_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
 
+# VTK Initialization
 vtk_module_autoinit(
     TARGETS ${PROJECT_NAME}
     MODULES ${VTK_LIBRARIES}
 )
 
-if(WIN32 AND TARGET coco)
-    # 1. More reliable way to find windeployqt in vcpkg
+# --- Windows Deployment ---
+if(WIN32 AND TARGET ${PROJECT_NAME})
     find_program(WINDEPLOYQT_EXE NAMES windeployqt.exe windeployqt
         PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/Qt6/bin"
               "${Qt6_DIR}/../../../bin"
-        NO_DEFAULT_PATH # Forces it to use our specific vcpkg/Qt paths
+        NO_DEFAULT_PATH
     )
 
     if(WINDEPLOYQT_EXE)
-        message(STATUS "Found windeployqt: ${WINDEPLOYQT_EXE}")
-
-        add_custom_command(TARGET coco POST_BUILD
-            # Use the generator expression only for the executable path.
-            # CMake handles the quoting for you—don't add \" manually.
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND $<$<CONFIG:Release>:${WINDEPLOYQT_EXE}>
                     $<$<CONFIG:Release>:--no-compiler-runtime>
                     $<$<CONFIG:Release>:--verbose> $<$<CONFIG:Release>:0>
-                    $<$<CONFIG:Release>:$<TARGET_FILE:coco>>
+                    $<$<CONFIG:Release>:$<TARGET_FILE:${PROJECT_NAME}>>
             COMMENT "Running windeployqt for Release build..."
             VERBATIM
         )
-    else()
-        message(WARNING "windeployqt not found! Qt deployment will fail.")
     endif()
 endif()
