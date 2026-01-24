@@ -22,7 +22,7 @@ target_sources(coco PRIVATE
     src/ui/MainWindow.cpp
 
     src/core/HullModel.cpp
-    src/render/RenderController.cpp
+    src/render/OcctViewport.cpp
 )
 
 target_include_directories(coco PRIVATE src)
