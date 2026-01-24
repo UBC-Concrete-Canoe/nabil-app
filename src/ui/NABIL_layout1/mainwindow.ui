@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="layoutDirection">
+    <enum>Qt::LayoutDirection::RightToLeft</enum>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0" columnstretch="1,1">
+    <item row="3" column="1">
+     <widget class="QFrame" name="frame_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>49</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Plan view</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QFrame" name="frame_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Bodyplan view</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Profile view</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QFrame" name="frame_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Perspective view</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menusiufuhhspou">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Export</string>
+     </property>
+     <addaction name="actionSTL"/>
+     <addaction name="actionCAD_NURBS"/>
+     <addaction name="action_fbm"/>
+     <addaction name="action_na_NABIL_Project"/>
+    </widget>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <addaction name="actionSTL_2"/>
+     <addaction name="actionCAD_NURBS_2"/>
+     <addaction name="action_fbm_2"/>
+     <addaction name="action_na"/>
+    </widget>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_as"/>
+    <addaction name="menuImport"/>
+    <addaction name="menuExport"/>
+    <addaction name="actionClose_current_project"/>
+    <addaction name="actionClose_all"/>
+    <addaction name="actionQuit"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+    <addaction name="actionProject_settings"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionSelect_all"/>
+   </widget>
+   <widget class="QMenu" name="menuDrawing_tools">
+    <property name="title">
+     <string>Drawing tools</string>
+    </property>
+    <widget class="QMenu" name="menuPoint">
+     <property name="title">
+      <string>Point</string>
+     </property>
+     <addaction name="actionAdd_point"/>
+     <addaction name="actionCollapse_points"/>
+     <addaction name="actionLock_point_s"/>
+    </widget>
+    <widget class="QMenu" name="menuEdge">
+     <property name="title">
+      <string>Edge</string>
+     </property>
+     <addaction name="actionExtrude"/>
+     <addaction name="actionSplit"/>
+     <addaction name="actionCollapse"/>
+    </widget>
+    <widget class="QMenu" name="menuFace">
+     <property name="title">
+      <string>Face</string>
+     </property>
+     <addaction name="actionNew_face"/>
+     <addaction name="actionInvert"/>
+    </widget>
+    <widget class="QMenu" name="menuTransform">
+     <property name="title">
+      <string>Transform</string>
+     </property>
+     <addaction name="actionScale"/>
+     <addaction name="actionRotate"/>
+     <addaction name="actionMove"/>
+    </widget>
+    <addaction name="menuPoint"/>
+    <addaction name="menuEdge"/>
+    <addaction name="actionNew_curve"/>
+    <addaction name="menuFace"/>
+    <addaction name="menuTransform"/>
+    <addaction name="actionAuto_smooth"/>
+   </widget>
+   <widget class="QMenu" name="menuCalcilations">
+    <property name="title">
+     <string>Calculations</string>
+    </property>
+    <addaction name="actionCalc1"/>
+    <addaction name="actionCalc2"/>
+    <addaction name="actionCalc3"/>
+   </widget>
+   <widget class="QMenu" name="menuCompare">
+    <property name="title">
+     <string>Compare</string>
+    </property>
+    <addaction name="actionOpen_projecy_file"/>
+    <addaction name="actionImport_file"/>
+    <addaction name="actionExport_data_to_Excel"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionDocumentation"/>
+    <addaction name="actionFAQ"/>
+    <addaction name="actionContact"/>
+   </widget>
+   <addaction name="menusiufuhhspou"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuDrawing_tools"/>
+   <addaction name="menuCalcilations"/>
+   <addaction name="menuCompare"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLayers"/>
+   <addaction name="separator"/>
+   <addaction name="actionWireframe"/>
+   <addaction name="actionSolid_surface"/>
+   <addaction name="separator"/>
+   <addaction name="actionstatus"/>
+  </widget>
+  <action name="actionFile">
+   <property name="text">
+    <string>File</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open...</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as...</string>
+   </property>
+  </action>
+  <action name="actionClose_current_project">
+   <property name="text">
+    <string>Close current project</string>
+   </property>
+  </action>
+  <action name="actionClose_all">
+   <property name="text">
+    <string>Close all</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionSelect_all">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+  </action>
+  <action name="actionDocumentation">
+   <property name="text">
+    <string>Documentation</string>
+   </property>
+  </action>
+  <action name="actionFAQ">
+   <property name="text">
+    <string>FAQ</string>
+   </property>
+  </action>
+  <action name="actionContact">
+   <property name="text">
+    <string>Getting Started</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Editor settings</string>
+   </property>
+  </action>
+  <action name="actionProject_settings">
+   <property name="text">
+    <string>Project settings</string>
+   </property>
+  </action>
+  <action name="actionNew_2">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionOpen_2">
+   <property name="text">
+    <string>Open...</string>
+   </property>
+  </action>
+  <action name="actionOpen_projecy_file">
+   <property name="text">
+    <string>Open project file</string>
+   </property>
+  </action>
+  <action name="actionImport_file">
+   <property name="text">
+    <string>Import file</string>
+   </property>
+  </action>
+  <action name="actionExport_data_to_Excel">
+   <property name="text">
+    <string>Export data to Excel...</string>
+   </property>
+  </action>
+  <action name="actionAdd_point">
+   <property name="text">
+    <string>Add point</string>
+   </property>
+  </action>
+  <action name="actionCollapse_points">
+   <property name="text">
+    <string>Collapse point(s)</string>
+   </property>
+  </action>
+  <action name="actionLock_point_s">
+   <property name="text">
+    <string>Lock point(s)</string>
+   </property>
+  </action>
+  <action name="actionExtrude">
+   <property name="text">
+    <string>Extrude</string>
+   </property>
+  </action>
+  <action name="actionSplit">
+   <property name="text">
+    <string>Split</string>
+   </property>
+  </action>
+  <action name="actionCollapse">
+   <property name="text">
+    <string>Insert</string>
+   </property>
+  </action>
+  <action name="actionNew_curve">
+   <property name="text">
+    <string>New curve</string>
+   </property>
+  </action>
+  <action name="actionNew_face">
+   <property name="text">
+    <string>New face</string>
+   </property>
+  </action>
+  <action name="actionInvert">
+   <property name="text">
+    <string>Invert</string>
+   </property>
+  </action>
+  <action name="actionSTL">
+   <property name="text">
+    <string>.stl</string>
+   </property>
+  </action>
+  <action name="actionCAD_NURBS">
+   <property name="text">
+    <string>CAD / NURBS</string>
+   </property>
+  </action>
+  <action name="action_fbm">
+   <property name="text">
+    <string>.fbm (FreeShip)</string>
+   </property>
+  </action>
+  <action name="actionSTL_2">
+   <property name="text">
+    <string>.stl</string>
+   </property>
+  </action>
+  <action name="actionCAD_NURBS_2">
+   <property name="text">
+    <string>CAD / NURBS</string>
+   </property>
+  </action>
+  <action name="action_fbm_2">
+   <property name="text">
+    <string>.fbm (FreeShip)</string>
+   </property>
+  </action>
+  <action name="action_na">
+   <property name="text">
+    <string>.na (NABIL Project)</string>
+   </property>
+  </action>
+  <action name="action_na_NABIL_Project">
+   <property name="text">
+    <string>.na (NABIL Project)</string>
+   </property>
+  </action>
+  <action name="actionCalc1">
+   <property name="text">
+    <string>Calc1</string>
+   </property>
+  </action>
+  <action name="actionCalc2">
+   <property name="text">
+    <string>Calc2</string>
+   </property>
+  </action>
+  <action name="actionCalc3">
+   <property name="text">
+    <string>Calc3</string>
+   </property>
+  </action>
+  <action name="actionWireframe">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/wiremesh.png</normaloff>:/wiremesh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Render project as wireframe</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSolid_surface">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/square.png</normaloff>:/square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Solid surface</string>
+   </property>
+   <property name="toolTip">
+    <string>Render project with contours</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionstatus">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/redcircle.png</normaloff>:/redcircle.png</iconset>
+   </property>
+   <property name="text">
+    <string>status</string>
+   </property>
+   <property name="toolTip">
+    <string>(inf) issues found.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionScale">
+   <property name="text">
+    <string>Scale</string>
+   </property>
+  </action>
+  <action name="actionRotate">
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="actionMove">
+   <property name="text">
+    <string>Move</string>
+   </property>
+  </action>
+  <action name="actionAuto_smooth">
+   <property name="text">
+    <string>Auto smooth</string>
+   </property>
+  </action>
+  <action name="actionLayers">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/layers.png</normaloff>:/layers.png</iconset>
+   </property>
+   <property name="text">
+    <string>Layers</string>
+   </property>
+   <property name="toolTip">
+    <string>View and switch project layers</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
