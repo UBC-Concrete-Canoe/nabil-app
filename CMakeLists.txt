@@ -13,7 +13,19 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(OpenCASCADE REQUIRED)
 find_package(VTK REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME})
+
+target_sources(coco PRIVATE
+    src/main.cpp
+
+    src/app/Application.cpp
+    src/ui/MainWindow.cpp
+
+    src/core/HullModel.cpp
+    src/render/RenderController.cpp
+)
+
+target_include_directories(coco PRIVATE src)
 
 # --- macOS Specific Configuration ---
 if(APPLE)
