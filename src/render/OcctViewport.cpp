@@ -50,39 +50,16 @@ void OcctViewport::initialize(WId windowHandle)
 
 void OcctViewport::displayShape(const TopoDS_Shape &shape)
 {
-    if (myContext.IsNull() || shape.IsNull())
-        return;
-
-    Handle(AIS_Shape) aisShape = new AIS_Shape(shape);
-
-    // Default display settings
-    myContext->Display(aisShape, AIS_Shaded, 0, false);
-    myContext->SetDisplayMode(aisShape, AIS_Shaded, true);
-
-    fitAll();
 }
 
 void OcctViewport::fitAll()
 {
-    if (!myView.IsNull())
-    {
-        myView->MustBeResized();
-        myView->FitAll();
-    }
 }
 
 void OcctViewport::redraw()
 {
-    if (!myView.IsNull())
-    {
-        myView->Redraw();
-    }
 }
 
 void OcctViewport::setBackgroundColor(int r, int g, int b)
 {
-    if (!myView.IsNull())
-    {
-        myView->SetBackgroundColor(Quantity_NOC_BLACK); // Simplest for skeleton
-    }
 }

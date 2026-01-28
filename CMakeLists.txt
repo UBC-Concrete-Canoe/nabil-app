@@ -19,7 +19,9 @@ target_sources(coco PRIVATE
     src/main.cpp
 
     src/app/Application.cpp
+
     src/ui/MainWindow.cpp
+    src/ui/OcctWidget.cpp
 
     src/core/HullModel.cpp
     src/render/OcctViewport.cpp
