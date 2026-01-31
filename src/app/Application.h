@@ -6,6 +6,7 @@ class Application
 {
 public:
     Application();
+    ~Application(); // Destructor is required now for unique_ptr
     void run();
 
 private:
