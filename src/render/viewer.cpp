@@ -17,14 +17,14 @@
 // 1. Constructor
 Viewer::Viewer(QWidget* parent) : QWidget(parent), m_isInitialized(false)
 {
-    // Force this widget to be a native Windows window (HWND)
     setAttribute(Qt::WA_NativeWindow);
-    // Tell Qt we will paint the screen manually
     setAttribute(Qt::WA_PaintOnScreen);
-    // Tell Qt NOT to clear the background
     setAttribute(Qt::WA_NoSystemBackground);
-    // Another flag to stop auto-filling the background
     setAutoFillBackground(false);
+
+    
+
+
 }
 
 // 2. Setup Logic
@@ -95,12 +95,17 @@ void Viewer::resizeEvent(QResizeEvent*)
 void Viewer::mousePressEvent(QMouseEvent* event)
 {
     if (m_evtMgr.IsNull()) return;
+
+    //
     Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
     if (event->button() == Qt::LeftButton) btn = Aspect_VKeyMouse_LeftButton;
     else if (event->button() == Qt::RightButton) btn = Aspect_VKeyMouse_RightButton;
     else if (event->button() == Qt::MiddleButton) btn = Aspect_VKeyMouse_MiddleButton;
     Graphic3d_Vec2i pos(event->position().x(), event->position().y());
+
     m_evtMgr->PressMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+    // Flush events to ensure immediate response
+    m_evtMgr->FlushViewEvents(m_context, m_view, true);
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* event)
@@ -112,6 +117,8 @@ void Viewer::mouseReleaseEvent(QMouseEvent* event)
     else if (event->button() == Qt::MiddleButton) btn = Aspect_VKeyMouse_MiddleButton;
     Graphic3d_Vec2i pos(event->position().x(), event->position().y());
     m_evtMgr->ReleaseMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+    // Flush events to ensure immediate response
+    m_evtMgr->FlushViewEvents(m_context, m_view, true);
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* event)
@@ -123,6 +130,8 @@ void Viewer::mouseMoveEvent(QMouseEvent* event)
     if (event->buttons() & Qt::RightButton) buttons |= Aspect_VKeyMouse_RightButton;
     if (event->buttons() & Qt::MiddleButton) buttons |= Aspect_VKeyMouse_MiddleButton;
     m_evtMgr->UpdateMousePosition(pos, buttons, Aspect_VKeyFlags_NONE, false);
+    // Flush events to ensure immediate response
+    m_evtMgr->FlushViewEvents(m_context, m_view, true);
 }
 
 void Viewer::wheelEvent(QWheelEvent* event)
@@ -131,6 +140,8 @@ void Viewer::wheelEvent(QWheelEvent* event)
     Graphic3d_Vec2i pos(event->position().x(), event->position().y());
     double delta = event->angleDelta().y() / 8.0 / 15.0; 
     m_evtMgr->UpdateMouseScroll(Aspect_ScrollDelta(pos, delta, Aspect_VKeyFlags_NONE));
+    // Flush events to ensure immediate response
+    m_evtMgr->FlushViewEvents(m_context, m_view, true);
 }
 
 void Viewer::addShape(const TopoDS_Shape& shape)
