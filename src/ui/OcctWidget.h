@@ -1,3 +1,4 @@
+#pragma once
 #include <QWidget>
 
 // TODO: Create a window that OcctViewport can live inside
