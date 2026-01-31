@@ -1,83 +1,48 @@
 #pragma once
+#include <QWidget> 
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+// OpenCascade Includes
+#include <AIS_InteractiveContext.hxx>
+#include <V3d_View.hxx>
+#include <V3d_Viewer.hxx>
 
-// Local includes
+// Local Includes
 #include "viewerInteractor.h"
 
-// OpenCascade includes
 #include <TopoDS_Shape.hxx>
-#include <WNT_Window.hxx>
 
-// Standard includes
-#include <vector>
-
-class V3d_Viewer;
-class V3d_View;
-class AIS_InteractiveContext;
-class AIS_ViewController;
-
-//-----------------------------------------------------------------------------
-
-//! Simple 3D viewer.
-class Viewer
+class Viewer : public QWidget 
 {
-public:
-
-  Viewer(const int left,
-         const int top,
-         const int width,
-         const int height);
+    Q_OBJECT
 
 public:
+    explicit Viewer(QWidget* parent = nullptr);
+    virtual ~Viewer() = default;
 
-  Viewer& operator<<(const TopoDS_Shape& shape)
-  {
-    this->AddShape(shape);
-    return *this;
-  }
+    Handle(AIS_InteractiveContext) GetContext() const { return m_context; }
 
-  void AddShape(const TopoDS_Shape& shape);
+    // --- CRITICAL: This line disables Qt's own rendering engine ---
+    QPaintEngine* paintEngine() const override { return nullptr; }
 
-  void StartMessageLoop();
+    // New function to display a shape
+    void addShape(const TopoDS_Shape& shape);
+
+protected:
+    void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+
+    // Inputs
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 private:
+    void init(); 
 
-  static LRESULT WINAPI
-    wndProcProxy(HWND hwnd,
-                 UINT message,
-                 WPARAM wparam,
-                 LPARAM lparam);
-
-  LRESULT CALLBACK
-    wndProc(HWND hwnd,
-            UINT message,
-            WPARAM wparam,
-            LPARAM lparam);
-
-  void init(const HANDLE& windowHandle);
-
-/* API-related things */
-private:
-
-  std::vector<TopoDS_Shape> m_shapes; //!< Shapes to visualize.
-
-/* OpenCascade's things */
-private:
-
-  Handle(V3d_Viewer)             m_viewer;
-  Handle(V3d_View)               m_view;
-  Handle(AIS_InteractiveContext) m_context;
-  Handle(WNT_Window)             m_wntWindow;
-  Handle(ViewerInteractor)       m_evtMgr;
-
-/* Lower-level things */
-private:
-
-  HINSTANCE m_hInstance; //!< Handle to the instance of the module.
-  HWND      m_hWnd;      //!< Handle to the instance of the window.
-  bool      m_bQuit;     //!< Indicates whether user want to quit from window.
-
+    Handle(V3d_Viewer)              m_viewer;
+    Handle(V3d_View)                m_view;
+    Handle(AIS_InteractiveContext)  m_context;
+    Handle(ViewerInteractor)        m_evtMgr;
+    bool                            m_isInitialized; 
 };

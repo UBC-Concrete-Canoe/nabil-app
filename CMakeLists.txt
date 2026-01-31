@@ -19,7 +19,7 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_sources(coco PRIVATE
 
-    src/app/Application.cpp
+   # src/app/Application.cpp
     src/ui/MainWindow.cpp
 
     src/core/HullModel.cpp
