@@ -13,6 +13,8 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(OpenCASCADE REQUIRED)
 find_package(VTK REQUIRED)
 
+
+
 add_executable(${PROJECT_NAME})
 
 target_sources(coco PRIVATE

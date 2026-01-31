@@ -132,6 +132,16 @@
         <string>Perspective view</string>
        </property>
       </widget>
+      <widget class="OcctViewWidget" name="openGLWidget">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>20</y>
+         <width>300</width>
+         <height>200</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -586,6 +596,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>OcctViewWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>occtviewwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="images.qrc"/>
  </resources>
