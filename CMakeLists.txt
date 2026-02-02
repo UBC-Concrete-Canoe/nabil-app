@@ -26,6 +26,8 @@ target_sources(coco PRIVATE
 
     src/core/HullModel.cpp
     src/render/OcctViewport.cpp
+
+    src/render/viewerInteractor.cpp
 )
 
 target_include_directories(coco PRIVATE src)

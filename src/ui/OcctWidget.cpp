@@ -5,8 +5,10 @@ OcctWidget::OcctWidget(QWidget *parent)
     : QWidget(parent)
 {
     // Essential for external engine rendering (OCCT/OpenGL)
+    setAttribute(Qt::WA_NativeWindow);
     setAttribute(Qt::WA_PaintOnScreen);
     setAttribute(Qt::WA_NoSystemBackground);
+    setAutoFillBackground(false);
 
     // Optional: Enable mouse tracking for the active editing loop
     setMouseTracking(true);
