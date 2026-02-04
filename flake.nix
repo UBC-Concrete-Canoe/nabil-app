@@ -1,4 +1,3 @@
-# I used Gemini to help build this
 {
 	description = "C++ Dev Setup with Qt6 & OCCT 7.9.3";
 
@@ -12,23 +11,48 @@
 			systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
 			perSystem = { config, self', pkgs, ... }: 
+			let
+				# Is it really necessary to do it this way? Well idk :shrug:
+				# Likely not, but it's working for me, so might as well right?
+
+				# OCCT 7.9.3 without vtk support
+				occBase = pkgs.callPackage ./NixModules/opencascade.nix {
+					withVtk = false;
+				};
+
+				# Link VTK to OCCT 7.9.3
+				vtkCustom = pkgs.vtkWithQt6.override {
+					opencascade-occt = occBase;
+				};
+
+				# Build for OCCT 7.9.3, linking against the new vtkCustom
+				occCustom = pkgs.callPackage ./NixModules/opencascade.nix {
+					vtk = vtkCustom;
+					withVtk = true;
+				};
+			in
 			{
+				packages.opencascade-occt = occCustom;
+				packages.vtkWithQt6 = vtkCustom;
+
 				devShells.default = pkgs.mkShell {
-					packages = with pkgs; [
+					nativeBuildInputs = with pkgs; [
 						# Build tools
 						gcc
 						cmake
 						ninja
 						pkg-config
 						gdb
-
+					];
+					
+					buildInputs = with pkgs; [
 						# Qt 6 Modules
 						qt6.qtbase
 						qt6.qtdeclarative
 						qt6.wrapQtAppsHook # Set Qt envvars
 
-						(opencascade-occt.override {withVtk = true; })
-						vtkWithQt6
+						self'.packages.opencascade-occt
+						self'.packages.vtkWithQt6
 					]
 					++ lib.optionals stdenv.isLinux [
 						qt6.qtwayland
@@ -55,10 +79,10 @@
 						''}
 
 						# OpenCascade Environment
-						export CASROOT="${pkgs.opencascade-occt}"
+						export CASROOT="${self'.packages.opencascade-occt}"
 
 						# Ensure CMake finds our local packages easily
-						export CMAKE_PREFIX_PATH="${pkgs.qt6.qtbase}:${pkgs.opencascade-occt}:$CMAKE_PREFIX_PATH"
+						export CMAKE_PREFIX_PATH="${pkgs.qt6.qtbase}:${self'.packages.opencascade-occt}:$CMAKE_PREFIX_PATH"
 
 						echo "-------------------------------------------------------"
 						echo "OpenCascade 7.9.3 + Qt6 Dev Environment Active"

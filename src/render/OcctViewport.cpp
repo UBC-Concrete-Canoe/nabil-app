@@ -35,7 +35,7 @@ void OcctViewport::initialize(WId windowHandle)
 #ifdef Q_OS_WIN
     Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
 #elif defined(Q_OS_LINUX)
-    Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Handle)windowHandle);
+    Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
 #elif defined(Q_OS_MAC)
     Handle(Cocoa_Window) wind = new Cocoa_Window((NSView *)windowHandle);
 #endif
