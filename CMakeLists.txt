@@ -13,17 +13,20 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(OpenCASCADE REQUIRED)
 find_package(VTK REQUIRED)
 
-add_executable(${PROJECT_NAME})
+#FIX: Added src/main.cpp here so the target is valid
+
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_sources(coco PRIVATE
-    src/main.cpp
 
     src/app/Application.cpp
+    src/app/ViewportController.cpp
 
     src/ui/MainWindow.cpp
     src/ui/OcctWidget.cpp
 
     src/core/HullModel.cpp
+
     src/render/OcctViewport.cpp
 )
 
@@ -32,11 +35,13 @@ target_include_directories(coco PRIVATE src)
 # --- macOS Specific Configuration ---
 if(APPLE)
     # 1. Force main.cpp to be treated as Objective-C++ to support NSView* casts
-    set_source_files_properties(main.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
+    set_source_files_properties(src/main.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
     
     # 2. Link AppKit (for windowing) and OpenGL (for rendering)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework OpenGL")
 endif()
+
+
 
 # --- General Linkage ---
 target_link_libraries(${PROJECT_NAME} PRIVATE
