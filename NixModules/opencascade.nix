@@ -20,9 +20,6 @@
 	libXi,
 	vtk,
 	withVtk ? false,
-
-	# used in passthru.tests
-	opencascade-occt,
 }:
 stdenv.mkDerivation rec {
 	pname = "opencascade-occt";
@@ -79,12 +76,6 @@ stdenv.mkDerivation rec {
 		(lib.cmakeBool "USE_VTK" true)
 		(lib.cmakeFeature "3RDPARTY_VTK_INCLUDE_DIR" "${lib.getDev vtk}/include/vtk")
 	];
-
-	passthru = {
-	tests = {
-	withVtk = opencascade-occt.override { withVtk = true; };
-	};
-	};
 
 	meta = {
 		description = "Open CASCADE Technology, libraries for 3D modeling and numerical simulation";

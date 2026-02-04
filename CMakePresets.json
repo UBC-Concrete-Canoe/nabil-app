@@ -1,37 +1,63 @@
 {
-  "version": 3,
-  "configurePresets": [
-    {
-      "name": "ninja-vcpkg-release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/release",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "VCPKG_FEATURE_FLAGS": "manifests",
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "ninja-vcpkg-debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/debug",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "VCPKG_FEATURE_FLAGS": "manifests",
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "build-release",
-      "configurePreset": "ninja-vcpkg-release",
-      "description": "Builds project in release mode"
-    },
-    {
-      "name": "build-debug",
-      "configurePreset": "ninja-vcpkg-debug",
-      "description": "Builds project in debug mode"
-    }
-  ]
+	"version": 3,
+	"configurePresets": [
+		{
+			"name": "ninja-vcpkg-release",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/windows-release",
+			"cacheVariables": {
+				"VCPKG_TARGET_TRIPLET": "x64-windows",
+				"VCPKG_FEATURE_FLAGS": "manifests",
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "ninja-vcpkg-debug",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/windows-debug",
+			"cacheVariables": {
+				"VCPKG_TARGET_TRIPLET": "x64-windows",
+				"VCPKG_FEATURE_FLAGS": "manifests",
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "linux-release",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/linux-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "linux-debug",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/linux-debug",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "build-release",
+			"configurePreset": "ninja-vcpkg-release",
+			"description": "Builds project in release mode"
+		},
+		{
+			"name": "build-debug",
+			"configurePreset": "ninja-vcpkg-debug",
+			"description": "Builds project in debug mode"
+		},
+		{
+			"name": "linux-release",
+			"configurePreset": "linux-release",
+			"description": "Build project in release mode, for Linux"
+		},
+		{
+			"name": "linux-debug",
+			"configurePreset": "linux-debug",
+			"description": "Builds project in debug mode, for Linux"
+		}
+	]
 }

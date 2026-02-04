@@ -54,7 +54,9 @@ void OcctViewport::initialize(WId windowHandle)
     // Logic adapted to be cross-platform compatible based on viewer.cpp
 #ifdef _WIN32
     Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
-#elif defined(__APPLE__)
+#elif defined(Q_OS_LINUX)
+    Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
+#elif defined(Q_OS_MAC)
     Handle(Cocoa_Window) wind = new Cocoa_Window((NSView *)windowHandle);
 #else
     Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
