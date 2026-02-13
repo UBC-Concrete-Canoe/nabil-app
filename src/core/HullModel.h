@@ -6,8 +6,8 @@
 class HullModel
 {
 public:
-    void addPoint(const ControlPoint &p);
+	void addPoint(const ControlPoint& p);
 
 private:
-    std::vector<ControlPoint> points;
+	std::vector<ControlPoint> points;
 };

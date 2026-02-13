@@ -1,8 +1,8 @@
 #pragma once
-#include "render/OcctViewport.h"
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QWheelEvent>
+#include "render/OcctViewport.h"
 
 // Inherit from AIS_ViewController to get standard OCCT mouse math (orbit/zoom/pan calculations)
 #include <AIS_ViewController.hxx>
@@ -15,16 +15,16 @@
 class ViewportController : public AIS_ViewController
 {
 public:
-    ViewportController(OcctViewport *viewport);
+	ViewportController(OcctViewport* viewport);
 
-    // --- Input Handlers (Called by UI) ---
-    void onMouseEvent(QMouseEvent *e);
-    void onWheelEvent(QWheelEvent *e);
-    void onKeyEvent(QKeyEvent *e);
+	// --- Input Handlers (Called by UI) ---
+	void onMouseEvent(QMouseEvent* e);
+	void onWheelEvent(QWheelEvent* e);
+	void onKeyEvent(QKeyEvent* e);
 
-    // Handle window resize logic
-    void onResize();
+	// Handle window resize logic
+	void onResize();
 
 private:
-    OcctViewport *m_viewport;
+	OcctViewport* m_viewport;
 };

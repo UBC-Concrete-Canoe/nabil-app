@@ -1,6 +1,7 @@
 #include "HullModel.h"
 
-void HullModel::addPoint(const ControlPoint &p)
+void
+HullModel::addPoint(const ControlPoint& p)
 {
-    points.push_back(p);
+	points.push_back(p);
 }
