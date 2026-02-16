@@ -2,6 +2,7 @@
 #include "ui/MainWindow.h"
 #include "render/OcctViewport.h"
 #include "ui/OcctWidget.h"
+#include "app/ViewportController.h"
 #include <V3d_Viewer.hxx>
 #include <V3d_View.hxx>
 #include <OpenGl_GraphicDriver.hxx>
@@ -17,6 +18,9 @@ void Application::run()
     OcctWidget *occt_widget = new OcctWidget();
     OcctViewport *occt_viewport = new OcctViewport();
 
+    // Initialise a new controller for occt_viewport
+    ViewportController *viewport_controller = new ViewportController(occt_viewport);
+
     // Put the OCCT-rendering widget into the main window
     window->setCentralWidget(occt_widget);
 
@@ -25,6 +29,7 @@ void Application::run()
 
     // Ensure the widget has a native handle created
     (void)occt_widget->winId();
+    occt_widget->setController(viewport_controller);
 
     // Initialize the viewport with the widget handle
     initializeGraphics(occt_widget, occt_viewport);
