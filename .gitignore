@@ -1,5 +1,7 @@
 build/
 CMakeUserPresets.json
+# user config file from qtcreator
+CMakeLists.txt.user
 .DS_Store
 
 # Direnv files from linux, currently specific to NixOS so ignoring for now

@@ -13,84 +13,75 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(OpenCASCADE REQUIRED)
 find_package(VTK REQUIRED)
 
-
-
-#FIX: Added src/main.cpp here so the target is valid
+# FIX: Added src/main.cpp here so the target is valid
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
-target_sources(coco PRIVATE
-
-    src/app/Application.cpp
-    src/app/ViewportController.cpp
-
-    src/ui/MainWindow.cpp
-    src/ui/OcctWidget.cpp
-
-    src/core/HullModel.cpp
-
-    src/render/OcctViewport.cpp
-)
+target_sources(
+    coco
+    PRIVATE src/app/Application.cpp src/app/ViewportController.cpp
+            src/ui/MainWindow.cpp src/ui/OcctWidget.cpp src/core/HullModel.cpp
+            src/render/OcctViewport.cpp)
 
 target_include_directories(coco PRIVATE src)
 
 # --- macOS Specific Configuration ---
 if(APPLE)
     # 1. Force main.cpp to be treated as Objective-C++ to support NSView* casts
-    set_source_files_properties(src/main.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
-    
-    # 2. Link AppKit (for windowing) and OpenGL (for rendering)
-    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework OpenGL")
+    set_source_files_properties(src/main.cpp PROPERTIES COMPILE_FLAGS
+                                                        "-x objective-c++")
+
+    # 1. Link AppKit (for windowing) and OpenGL (for rendering)
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit"
+                                                  "-framework OpenGL")
 endif()
 
-
-
 # --- General Linkage ---
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt6::Widgets
-    Qt6::OpenGLWidgets
+target_link_libraries(
+    ${PROJECT_NAME}
+    PRIVATE Qt6::Widgets
+            Qt6::OpenGLWidgets
+            # OCCT Libraries
+            TKernel
+            TKMath
+            TKG2d
+            TKG3d
+            TKGeomBase
+            TKBRep
+            TKTopAlgo
+            TKPrim
+            TKService
+            TKV3d
+            TKOpenGl
+            # VTK Libraries
+            ${VTK_LIBRARIES})
 
-    # OCCT Libraries
-    TKernel
-    TKMath
-    TKG2d
-    TKG3d
-    TKGeomBase
-    TKBRep
-    TKTopAlgo
-    TKPrim
-    TKService
-    TKV3d
-    TKOpenGl
-    
-    # VTK Libraries
-    ${VTK_LIBRARIES}
-)
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCASCADE_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCASCADE_INCLUDE_DIR}
+                                                   ${VTK_INCLUDE_DIRS})
 
 # VTK Initialization
-vtk_module_autoinit(
-    TARGETS ${PROJECT_NAME}
-    MODULES ${VTK_LIBRARIES}
-)
+vtk_module_autoinit(TARGETS ${PROJECT_NAME} MODULES ${VTK_LIBRARIES})
 
 # --- Windows Deployment ---
 if(WIN32 AND TARGET ${PROJECT_NAME})
-    find_program(WINDEPLOYQT_EXE NAMES windeployqt.exe windeployqt
+    find_program(
+        WINDEPLOYQT_EXE
+        NAMES windeployqt.exe windeployqt
         PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/Qt6/bin"
               "${Qt6_DIR}/../../../bin"
-        NO_DEFAULT_PATH
-    )
+        NO_DEFAULT_PATH)
 
     if(WINDEPLOYQT_EXE)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND $<$<CONFIG:Release>:${WINDEPLOYQT_EXE}>
-                    $<$<CONFIG:Release>:--no-compiler-runtime>
-                    $<$<CONFIG:Release>:--verbose> $<$<CONFIG:Release>:0>
-                    $<$<CONFIG:Release>:$<TARGET_FILE:${PROJECT_NAME}>>
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND
+                $<$<CONFIG:Release>:${WINDEPLOYQT_EXE}>
+                $<$<CONFIG:Release>:--no-compiler-runtime>
+                $<$<CONFIG:Release>:--verbose> $<$<CONFIG:Release>:0>
+                $<$<CONFIG:Release>:$<TARGET_FILE:${PROJECT_NAME}>>
             COMMENT "Running windeployqt for Release build..."
-            VERBATIM
-        )
+            VERBATIM)
     endif()
 endif()
+
