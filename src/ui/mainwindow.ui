@@ -600,7 +600,7 @@
   <customwidget>
    <class>OcctWidget</class>
    <extends>QWidget</extends>
-   <header>occtwidget.h</header>
+   <header>ui/OcctWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
