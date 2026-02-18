@@ -1,26 +1,80 @@
 #include "OcctWidget.h"
+#include "app/ViewportController.h"
 
-// The Linker was specifically looking for this constructor definition
-OcctWidget::OcctWidget(QWidget *parent)
-    : QWidget(parent)
+OcctWidget::OcctWidget(QWidget* parent)
+  : QWidget(parent)
 {
-    // Essential for external engine rendering (OCCT/OpenGL)
-    setAttribute(Qt::WA_PaintOnScreen);
-    setAttribute(Qt::WA_NoSystemBackground);
+	// --- PRESERVED LOGIC: Window Attributes ---
+	setAttribute(Qt::WA_NativeWindow);
+	setAttribute(Qt::WA_PaintOnScreen);
+	setAttribute(Qt::WA_NoSystemBackground); // Do not clear background (prevents flickering)
+	setAutoFillBackground(false);
 
-    // Optional: Enable mouse tracking for the active editing loop
-    setMouseTracking(true);
+	// Interaction settings
+	setMouseTracking(true);          // Needed for hover highlighting
+	setFocusPolicy(Qt::StrongFocus); // Needed to catch Key Events (F, S, W)
 }
 
-void OcctWidget::resizeEvent(QResizeEvent *e)
+void
+OcctWidget::resizeEvent(QResizeEvent* e)
 {
-    // The App Layer/Linker will eventually use this to trigger OcctViewport::handleResize
-    QWidget::resizeEvent(e);
+	if (m_controller)
+	{
+		m_controller->onResize();
+	}
+	QWidget::resizeEvent(e);
 }
 
-void OcctWidget::mouseMoveEvent(QMouseEvent *e)
+void
+OcctWidget::paintEvent(QPaintEvent* e)
 {
-    // This is where the active editing loop begins
-    // We will eventually convert 'e' into a Core-layer command
-    QWidget::mouseMoveEvent(e);
+	// We intentionally do nothing here because OCCT handles the rendering.
+	// If we painted here, we might overwrite the 3D view.
+}
+
+// --- Event Forwarding ---
+
+void
+OcctWidget::mousePressEvent(QMouseEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->onMouseEvent(e);
+	}
+}
+
+void
+OcctWidget::mouseMoveEvent(QMouseEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->onMouseEvent(e);
+	}
+}
+
+void
+OcctWidget::mouseReleaseEvent(QMouseEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->onMouseEvent(e);
+	}
+}
+
+void
+OcctWidget::wheelEvent(QWheelEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->onWheelEvent(e);
+	}
+}
+
+void
+OcctWidget::keyPressEvent(QKeyEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->onKeyEvent(e);
+	}
 }

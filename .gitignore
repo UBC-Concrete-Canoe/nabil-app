@@ -1,3 +1,7 @@
 build/
 CMakeUserPresets.json
 .DS_Store
+
+# Direnv files from linux, currently specific to NixOS so ignoring for now
+.direnv
+.envrc
