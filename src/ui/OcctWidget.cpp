@@ -1,5 +1,5 @@
 #include "OcctWidget.h"
-#include "app/ViewportController.h"
+#include "../app/ViewportController.h"
 
 OcctWidget::OcctWidget(QWidget* parent)
   : QWidget(parent)
