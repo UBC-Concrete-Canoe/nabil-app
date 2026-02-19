@@ -22,6 +22,7 @@ ViewportController::onMousePressEvent(QMouseEvent* e)
 		return;
 	}
 
+	// Map Qt button enum to OCCT enum
 	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
 	if (e->button() == Qt::LeftButton)
 	{
@@ -49,6 +50,7 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e)
 		return;
 	}
 
+	// Map Qt button enum to OCCT enum
 	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
 	if (e->button() == Qt::LeftButton)
 	{
@@ -77,6 +79,7 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e)
 	}
 
 	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	// Aggregate all pressed buttons during motion
 	Aspect_VKeyMouse buttons = Aspect_VKeyMouse_NONE;
 
 	if (e->buttons() & Qt::LeftButton)
@@ -104,8 +107,8 @@ ViewportController::onWheelEvent(QWheelEvent* e)
 		return;
 	}
 
-	// Standard Zoom Scaling from viewer.cpp
 	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	// Convert wheel delta to normalized zoom speed (angleDelta ~ 120 per tick)
 	double delta = e->angleDelta().y() / 8.0 / 15.0;
 
 	UpdateMouseScroll(Aspect_ScrollDelta(pos, delta, Aspect_VKeyFlags_NONE));
@@ -115,8 +118,6 @@ ViewportController::onWheelEvent(QWheelEvent* e)
 void
 ViewportController::onKeyEvent(QKeyEvent* e)
 {
-	// PRESERVED LOGIC: Key bindings from viewerInteractor.cpp
-
 	switch (e->key())
 	{
 		case Qt::Key_F:
@@ -131,14 +132,13 @@ ViewportController::onKeyEvent(QKeyEvent* e)
 			break;
 
 		case Qt::Key_S:
-			m_viewport->setShadingMode(false); // Shaded
+			m_viewport->setShadingMode(false);
 			break;
 
 		case Qt::Key_W:
-			m_viewport->setShadingMode(true); // Wireframe
+			m_viewport->setShadingMode(true);
 			break;
 
-		// --- Axonometric Views ---
 		case Qt::Key_Backspace:
 			m_viewport->setViewPreset(V3d_XposYnegZpos);
 			break;

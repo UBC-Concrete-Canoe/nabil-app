@@ -8,23 +8,55 @@
 #include <AIS_ViewController.hxx>
 
 /**
- * @brief The Controller Layer.
- * Interprets raw Qt events and executes logic on the OcctViewport.
- * Replaces functionality previously found in 'viewerInteractor.cpp'.
+ * @brief Controller layer for viewport interaction.
+ *
+ * Interprets Qt user input (mouse, keyboard) and translates it into OpenCascade view
+ * transformations (orbit, pan, zoom). Inherits from AIS_ViewController to leverage
+ * OCCT's built-in interaction mathematics.
  */
 class ViewportController : public AIS_ViewController
 {
 public:
+	/**
+	 * @brief Constructor.
+	 * @param viewport The viewport this controller will manipulate (ownership with caller)
+	 */
 	ViewportController(OcctViewport* viewport);
 
-	// --- Input Handlers (Called by UI) ---
+	/**
+	 * @brief Handle mouse button press.
+	 * Initiates interaction (rotation, zoom, or pan) based on button.
+	 */
 	void onMousePressEvent(QMouseEvent* e);
+
+	/**
+	 * @brief Handle mouse button release.
+	 * Ends the current interaction.
+	 */
 	void onMouseReleaseEvent(QMouseEvent* e);
+
+	/**
+	 * @brief Handle mouse movement.
+	 * Updates view transformation while button is held.
+	 */
 	void onMouseMoveEvent(QMouseEvent* e);
+
+	/**
+	 * @brief Handle mouse wheel scroll.
+	 * Zooms the view in/out.
+	 */
 	void onWheelEvent(QWheelEvent* e);
+
+	/**
+	 * @brief Handle keyboard input.
+	 * Performs view presets and display mode toggles (F=fit, S=shaded, W=wireframe, etc).
+	 */
 	void onKeyEvent(QKeyEvent* e);
 
-	// Handle window resize logic
+	/**
+	 * @brief Handle window resize.
+	 * Notifies the view of geometry changes.
+	 */
 	void onResize();
 
 private:

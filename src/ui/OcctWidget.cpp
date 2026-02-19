@@ -4,15 +4,13 @@
 OcctWidget::OcctWidget(QWidget* parent)
   : QWidget(parent)
 {
-	// --- PRESERVED LOGIC: Window Attributes ---
 	setAttribute(Qt::WA_NativeWindow);
 	setAttribute(Qt::WA_PaintOnScreen);
-	setAttribute(Qt::WA_NoSystemBackground); // Do not clear background (prevents flickering)
+	setAttribute(Qt::WA_NoSystemBackground);
 	setAutoFillBackground(false);
 
-	// Interaction settings
-	setMouseTracking(true);          // Needed for hover highlighting
-	setFocusPolicy(Qt::StrongFocus); // Needed to catch Key Events (F, S, W)
+	setMouseTracking(true);
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 void
@@ -28,11 +26,8 @@ OcctWidget::resizeEvent(QResizeEvent* e)
 void
 OcctWidget::paintEvent(QPaintEvent* e)
 {
-	// OCCT handles all rendering; we just need to exist as a container
-	// The view redraws itself through FlushViewEvents called by the controller
+	// OCCT handles rendering; Qt's paint engine is disabled in paintEngine()
 }
-
-// --- Event Forwarding ---
 
 void
 OcctWidget::mousePressEvent(QMouseEvent* e)
@@ -40,7 +35,7 @@ OcctWidget::mousePressEvent(QMouseEvent* e)
 	if (m_controller)
 	{
 		m_controller->onMousePressEvent(e);
-		update(); // Schedule a repaint
+		update();
 	}
 }
 
@@ -50,7 +45,7 @@ OcctWidget::mouseMoveEvent(QMouseEvent* e)
 	if (m_controller)
 	{
 		m_controller->onMouseMoveEvent(e);
-		update(); // Schedule a repaint
+		update();
 	}
 }
 
@@ -60,7 +55,7 @@ OcctWidget::mouseReleaseEvent(QMouseEvent* e)
 	if (m_controller)
 	{
 		m_controller->onMouseReleaseEvent(e);
-		update(); // Schedule a repaint
+		update();
 	}
 }
 
@@ -70,7 +65,7 @@ OcctWidget::wheelEvent(QWheelEvent* e)
 	if (m_controller)
 	{
 		m_controller->onWheelEvent(e);
-		update(); // Schedule a repaint
+		update();
 	}
 }
 
@@ -80,6 +75,6 @@ OcctWidget::keyPressEvent(QKeyEvent* e)
 	if (m_controller)
 	{
 		m_controller->onKeyEvent(e);
-		update(); // Schedule a repaint
+		update();
 	}
 }
