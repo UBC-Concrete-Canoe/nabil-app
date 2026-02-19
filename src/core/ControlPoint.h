@@ -2,7 +2,7 @@
 
 struct ControlPoint
 {
-    double x{};
-    double y{};
-    double z{};
+	double x{};
+	double y{};
+	double z{};
 };

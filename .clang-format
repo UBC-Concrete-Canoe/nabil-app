@@ -1,0 +1,53 @@
+---
+# .clang-format for Hull-Design CAD Application
+# Based on: Mozilla + Allman Bracing + Qt/CAD Optimizations
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+BasedOnStyle: Mozilla
+
+# --- Indentation & Spacing ---
+AccessModifierOffset: -4
+UseTab: ForContinuationAndIndentation
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 4
+IndentAccessModifiers: false
+EmptyLineBeforeAccessModifier: LogicalBlock
+
+# --- Bracing & Layout ---
+BreakBeforeBraces: Allman
+InsertBraces: true
+ColumnLimit: 100
+AlignAfterOpenBracket: BlockIndent
+SpaceAfterTemplateKeyword: true
+FixNamespaceComments: true
+ShortNamespaceLines: 0
+
+# --- Qt Specifics ---
+# Prevents clang-format from misinterpreting Qt macros
+StatementMacros:
+  - Q_OBJECT
+  - Q_GADGET
+  - Q_PROPERTY
+  - Q_INVOKABLE
+  - Q_SIGNAL
+  - Q_SLOT
+  - SIGNALS
+  - SLOTS
+
+# --- Include Sorting ---
+# Groups: 1. Standard Libs, 2. Qt Framework, 3. Project Headers
+SortIncludes: CaseSensitive
+IncludeCategories:
+  - Regex:           '^<Qt.*'
+    Priority:        2
+  - Regex:           '^<.*'
+    Priority:        1
+  - Regex:           '.*'
+    Priority:        3
+
+# --- Math & Geometry specific ---
+# Keeps long coordinate initializers readable
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+...
