@@ -15,17 +15,69 @@ ViewportController::onResize()
 }
 
 void
-ViewportController::onMouseEvent(QMouseEvent* e)
+ViewportController::onMousePressEvent(QMouseEvent* e)
 {
-	if (!m_viewport->getView())
+	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	// 1. Map Qt Buttons to OCCT Flags
+	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
+	if (e->button() == Qt::LeftButton)
+	{
+		btn = Aspect_VKeyMouse_LeftButton;
+	}
+	else if (e->button() == Qt::RightButton)
+	{
+		btn = Aspect_VKeyMouse_RightButton;
+	}
+	else if (e->button() == Qt::MiddleButton)
+	{
+		btn = Aspect_VKeyMouse_MiddleButton;
+	}
+
+	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	PressMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
+}
+
+void
+ViewportController::onMouseReleaseEvent(QMouseEvent* e)
+{
+	if (!m_viewport || !m_viewport->getView())
+	{
+		return;
+	}
+
+	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
+	if (e->button() == Qt::LeftButton)
+	{
+		btn = Aspect_VKeyMouse_LeftButton;
+	}
+	else if (e->button() == Qt::RightButton)
+	{
+		btn = Aspect_VKeyMouse_RightButton;
+	}
+	else if (e->button() == Qt::MiddleButton)
+	{
+		btn = Aspect_VKeyMouse_MiddleButton;
+	}
+
+	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	ReleaseMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
+}
+
+void
+ViewportController::onMouseMoveEvent(QMouseEvent* e)
+{
+	if (!m_viewport || !m_viewport->getView())
+	{
+		return;
+	}
+
 	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
 	Aspect_VKeyMouse buttons = Aspect_VKeyMouse_NONE;
-	Aspect_VKeyFlags flags = Aspect_VKeyFlags_NONE;
 
 	if (e->buttons() & Qt::LeftButton)
 	{
@@ -39,25 +91,8 @@ ViewportController::onMouseEvent(QMouseEvent* e)
 	{
 		buttons |= Aspect_VKeyMouse_MiddleButton;
 	}
-	if (e->modifiers() & Qt::ShiftModifier)
-	{
-		flags |= Aspect_VKeyFlags_SHIFT;
-	}
-	if (e->modifiers() & Qt::ControlModifier)
-	{
-		flags |= Aspect_VKeyFlags_CTRL;
-	}
 
-	// 2. Let AIS_ViewController update internal state (Mouse position, etc.)
-	UpdateMousePosition(pos, buttons, flags, false);
-
-	// 3. Handle Click/Press/Release logic if needed (handled internally by FlushViewEvents usually)
-	if (e->type() == QEvent::MouseButtonPress)
-	{
-		ProcessInput();
-	}
-
-	// 4. Apply the changes to the View (Orbit, Pan, Zoom, Select)
+	UpdateMousePosition(pos, buttons, Aspect_VKeyFlags_NONE, false);
 	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
 }
 

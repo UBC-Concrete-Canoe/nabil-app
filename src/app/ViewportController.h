@@ -18,7 +18,9 @@ public:
 	ViewportController(OcctViewport* viewport);
 
 	// --- Input Handlers (Called by UI) ---
-	void onMouseEvent(QMouseEvent* e);
+	void onMousePressEvent(QMouseEvent* e);
+	void onMouseReleaseEvent(QMouseEvent* e);
+	void onMouseMoveEvent(QMouseEvent* e);
 	void onWheelEvent(QWheelEvent* e);
 	void onKeyEvent(QKeyEvent* e);
 

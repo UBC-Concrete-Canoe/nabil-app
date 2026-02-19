@@ -28,8 +28,8 @@ OcctWidget::resizeEvent(QResizeEvent* e)
 void
 OcctWidget::paintEvent(QPaintEvent* e)
 {
-	// We intentionally do nothing here because OCCT handles the rendering.
-	// If we painted here, we might overwrite the 3D view.
+	// OCCT handles all rendering; we just need to exist as a container
+	// The view redraws itself through FlushViewEvents called by the controller
 }
 
 // --- Event Forwarding ---
@@ -39,7 +39,8 @@ OcctWidget::mousePressEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMouseEvent(e);
+		m_controller->onMousePressEvent(e);
+		update(); // Schedule a repaint
 	}
 }
 
@@ -48,7 +49,8 @@ OcctWidget::mouseMoveEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMouseEvent(e);
+		m_controller->onMouseMoveEvent(e);
+		update(); // Schedule a repaint
 	}
 }
 
@@ -57,7 +59,8 @@ OcctWidget::mouseReleaseEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMouseEvent(e);
+		m_controller->onMouseReleaseEvent(e);
+		update(); // Schedule a repaint
 	}
 }
 
@@ -67,6 +70,7 @@ OcctWidget::wheelEvent(QWheelEvent* e)
 	if (m_controller)
 	{
 		m_controller->onWheelEvent(e);
+		update(); // Schedule a repaint
 	}
 }
 
@@ -76,5 +80,6 @@ OcctWidget::keyPressEvent(QKeyEvent* e)
 	if (m_controller)
 	{
 		m_controller->onKeyEvent(e);
+		update(); // Schedule a repaint
 	}
 }
