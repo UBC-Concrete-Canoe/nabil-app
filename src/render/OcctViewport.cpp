@@ -21,13 +21,12 @@ OcctViewport::OcctViewport() {}
 void
 OcctViewport::initialize(WId windowHandle)
 {
-	// 1. Create Graphic Driver
+	// Create the graphics driver and viewer
 	Handle(Aspect_DisplayConnection) displayConnection = new Aspect_DisplayConnection();
 	Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(displayConnection);
-
 	myViewer = new V3d_Viewer(graphicDriver);
 
-	// --- LIGHTING SETUP ---
+	// Set up directional and ambient lighting
 	Handle(V3d_DirectionalLight) lightDir =
 		new V3d_DirectionalLight(V3d_Zneg, Quantity_Color(Quantity_NOC_GRAY97), 1);
 	lightDir->SetDirection(1.0, -2.0, -10.0);
@@ -38,22 +37,17 @@ OcctViewport::initialize(WId windowHandle)
 	myViewer->SetLightOn(lightDir);
 	myViewer->SetLightOn(lightAmb);
 
-	// 2. Create Context
+	// Create the interactive context for rendering objects
 	myContext = new AIS_InteractiveContext(myViewer);
-
-	// Preference: Draw face boundaries (from viewer.cpp)
 	myContext->DefaultDrawer()->SetFaceBoundaryDraw(true);
 
-	// 3. Create View
+	// Create the view
 	myView = myViewer->CreateView();
 	myView->SetImmediateUpdate(false);
 	myView->SetShadingModel(V3d_PHONG);
-
-	// This resolves issues where Qt might paint over the background.
 	myView->SetBackgroundColor(Quantity_NOC_BLACK);
 
-	// 4. Window Embedding
-	// Logic adapted to be cross-platform compatible based on viewer.cpp
+	// Embed the view into the Qt widget's native window handle
 #ifdef _WIN32
 	Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
 #elif defined(Q_OS_LINUX)
@@ -124,9 +118,10 @@ OcctViewport::setShadingMode(bool wireframe)
 		return;
 	}
 
-	// Logic ported from ViewerInteractor.cpp
+	// Select the display mode: AIS_WireFrame or AIS_Shaded
 	const int dm = wireframe ? AIS_WireFrame : AIS_Shaded;
 
+	// Apply to all objects if nothing is selected, otherwise apply to selection
 	if (myContext->NbSelected() == 0)
 	{
 		myContext->SetDisplayMode(dm, false);

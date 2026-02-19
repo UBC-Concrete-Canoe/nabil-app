@@ -4,24 +4,32 @@
 class ViewportController;
 
 /**
- * @brief The UI Layer.
- * A dumb container that forwards Qt Events to the Controller.
- * Sets critical Qt Attributes to allow OCCT to render into the window.
+ * @brief UI widget that hosts OCCT rendering.
+ *
+ * This widget serves as a bridge between Qt and OpenCascade Technology (OCCT). It:
+ * - Disables Qt's paint engine to allow OCCT direct hardware access
+ * - Forwards input events to the ViewportController
+ * - Manages critical Qt attributes for OCCT rendering
+ *
+ * The widget requires a ViewportController to be injected via setController() to
+ * properly handle user interactions.
  */
 class OcctWidget : public QWidget
 {
 	Q_OBJECT
 public:
+	//! Constructor.
 	explicit OcctWidget(QWidget* parent = nullptr);
 
-	// Dependency Injection for the Controller
+	/**
+	 * @brief Inject the controller that interprets user input.
+	 * @param controller Ownership remains with caller
+	 */
 	void setController(ViewportController* controller) { m_controller = controller; }
 
 protected:
-	// Important: Tell Qt not to paint over our OCCT content
 	QPaintEngine* paintEngine() const override { return nullptr; }
 
-	// Event Overrides
 	void resizeEvent(QResizeEvent* e) override;
 	void paintEvent(QPaintEvent* e) override;
 

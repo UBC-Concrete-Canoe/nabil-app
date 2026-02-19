@@ -8,60 +8,85 @@
 #include <V3d_Viewer.hxx>
 
 /**
- * @brief The Engine Layer.
- * Manages the raw OpenCascade rendering window, lighting, and geometric context.
+ * @brief The rendering engine layer for OpenCascade viewport.
+ *
+ * Manages the OCCT viewer, context, and view. Provides a clean interface for:
+ * - Displaying and removing geometry (TopoDS_Shape objects)
+ * - Viewport transformations (fitting, zoom, pan, rotate)
+ * - Display mode control (shaded vs wireframe)
+ * - View preset configurations (top, bottom, front, side views)
  */
 class OcctViewport
 {
 public:
+	///! Constructor.
 	OcctViewport();
+	//! Destructor.
 	~OcctViewport() = default;
 
 	/**
-	 * @brief Initializes the OCCT viewer and binds it to the OS window handle.
-	 * Contains the critical WNT_Window/Cocoa_Window logic.
-	 * @param windowHandle The native OS window ID (WId) from Qt.
+	 * @brief Initialize the OCCT viewer within a native OS window.
+	 *
+	 * Sets up the OpenGL driver, viewer, context, view, and lighting.
+	 * Must be called before any rendering occurs. Internally handles
+	 * platform-specific window embedding (Windows/macOS/Linux).
+	 *
+	 * @param windowHandle Native window handle from Qt (WId)
 	 */
 	void initialize(WId windowHandle);
 
-	// --- Geometry Actions ---
-
 	/**
-	 * @brief Displays a generic TopoDS_Shape in the context.
+	 * @brief Display a shape in the viewport.
+	 *
+	 * Wraps the shape in an AIS_Shape and adds it to the context.
+	 * Automatically fits the view to show the entire shape.
+	 *
+	 * @param shape The geometry to display (TopoDS_Shape)
 	 */
 	void displayShape(const TopoDS_Shape& shape);
 
 	/**
-	 * @brief Clears all objects from the viewer.
+	 * @brief Clear all displayed objects from the viewport.
 	 */
 	void removeAll();
 
-	// --- Camera & View Actions ---
-	// These methods are called by the Controller in response to user input.
-
+	/**
+	 * @brief Fit the view to show all objects.
+	 */
 	void fitAll();
+
+	/**
+	 * @brief Fit the view to show only selected objects.
+	 */
 	void fitSelected();
 
 	/**
-	 * @brief Sets the camera projection (Top, Bottom, Left, etc.).
+	 * @brief Set the viewing angle (e.g., top view, front view, isometric).
+	 * @param orientation V3d view orientation preset
 	 */
 	void setViewPreset(V3d_TypeOfOrientation orientation);
 
 	/**
-	 * @brief Toggles between Shaded and Wireframe rendering modes.
-	 * @param wireframe If true, sets mode to AIS_WireFrame.
+	 * @brief Toggle between shaded and wireframe display modes.
+	 * @param wireframe True for wireframe, false for shaded
 	 */
 	void setShadingMode(bool wireframe);
 
 	/**
-	 * @brief Forces a redraw of the view.
+	 * @brief Trigger a view redraw on the next render cycle.
 	 */
 	void redraw();
 
-	// --- Accessors for Controller ---
-	// The Controller (AIS_ViewController) needs direct access to these handles
-	// to perform math for panning/zooming/selecting.
+	/**
+	 * @brief Get the interactive context for direct OCCT access.
+	 * @return Reference to the AIS_InteractiveContext
+	 */
 	Handle(AIS_InteractiveContext) getContext() { return myContext; }
+
+	/**
+	 * @brief Get the 3D view handle for direct OCCT access.
+	 * @return Reference to the V3d_View
+	 */
 	Handle(V3d_View) getView() { return myView; }
 
 private:
