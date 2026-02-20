@@ -155,7 +155,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menusiufuhhspou">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
@@ -241,7 +241,7 @@
     <addaction name="menuTransform"/>
     <addaction name="actionAuto_smooth"/>
    </widget>
-   <widget class="QMenu" name="menuCalcilations">
+   <widget class="QMenu" name="menuCalculations">
     <property name="title">
      <string>Calculations</string>
     </property>
@@ -253,7 +253,7 @@
     <property name="title">
      <string>Compare</string>
     </property>
-    <addaction name="actionOpen_projecy_file"/>
+    <addaction name="actionOpen_project_file"/>
     <addaction name="actionImport_file"/>
     <addaction name="actionExport_data_to_Excel"/>
    </widget>
@@ -268,7 +268,7 @@
    <addaction name="menusiufuhhspou"/>
    <addaction name="menuEdit"/>
    <addaction name="menuDrawing_tools"/>
-   <addaction name="menuCalcilations"/>
+   <addaction name="menuCalculations"/>
    <addaction name="menuCompare"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -400,7 +400,7 @@
     <string>Open...</string>
    </property>
   </action>
-  <action name="actionOpen_projecy_file">
+  <action name="actionOpen_project_file">
    <property name="text">
     <string>Open project file</string>
    </property>

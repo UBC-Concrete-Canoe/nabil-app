@@ -31,6 +31,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/render/OcctViewport.cpp
     
     src/ui/MainWindow.ui
+    src/ui/images.qrc
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)

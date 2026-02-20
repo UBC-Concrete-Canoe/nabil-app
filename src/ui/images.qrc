@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>square.png</file>
-        <file>wiremesh.png</file>
-        <file>redcircle.png</file>
-        <file>layers.png</file>
+        <file>../../assets/square.png</file>
+        <file>../../assets/wiremesh.png</file>
+        <file>../../assets/redcircle.png</file>
+        <file>../../assets/layers.png</file>
     </qresource>
 </RCC>
