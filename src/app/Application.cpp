@@ -3,6 +3,7 @@
 #include <OpenGl_GraphicDriver.hxx>
 #include <V3d_View.hxx>
 #include <V3d_Viewer.hxx>
+#include "app/ViewportController.h"
 #include "render/OcctViewport.h"
 #include "ui/MainWindow.h"
 #include "ui/OcctWidget.h"
@@ -18,19 +19,23 @@ Application::run()
 	OcctWidget* occt_widget = new OcctWidget();
 	OcctViewport* occt_viewport = new OcctViewport();
 
-	// Put the OCCT-rendering widget into the main window
+	// Create the controller to handle user input
+	ViewportController* viewport_controller = new ViewportController(occt_viewport);
+
+	// Set the OCCT widget as the main window's central widget
 	window->setCentralWidget(occt_widget);
 
-	// Show the window first to ensure native handles are created
+	// Show the window to create the native window handle
 	window->show();
 
-	// Ensure the widget has a native handle created
+	// Ensure Qt creates a native handle; required for OCCT embedding
 	(void)occt_widget->winId();
+	occt_widget->setController(viewport_controller);
 
-	// Initialize the viewport with the widget handle
+	// Initialize OCCT within the widget's native window
 	initializeGraphics(occt_widget, occt_viewport);
 
-	// Create a demo box and display it via the viewport
+	// Create and display a demo object
 	TopoDS_Shape box = BRepPrimAPI_MakeBox(10.0, 10.0, 20.0).Shape();
 	occt_viewport->displayShape(box);
 }

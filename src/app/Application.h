@@ -2,14 +2,33 @@
 #include "render/OcctViewport.h"
 #include "ui/OcctWidget.h"
 
+/**
+ * @brief Application entry point and initialization.
+ *
+ * Handles startup logic including window creation, OCCT viewport
+ * initialization, and scene population.
+ */
 class Application
 {
 public:
+	//! Constructor.
 	Application();
-	~Application(); // Destructor is required now for unique_ptr
+	//! Destructor.
+	~Application();
+
+	/**
+	 * @brief Initialize and run the application.
+	 *
+	 * Creates the main window, viewport, and controller, then displays
+	 * the initial scene.
+	 */
 	void run();
 
 private:
-	// TODO: Create the UI render area and create an associate viewport
+	/**
+	 * @brief Initialize OCCT rendering in the given widget.
+	 * @param widget The OcctWidget receiving the viewport
+	 * @param viewport The OcctViewport to initialize
+	 */
 	void initializeGraphics(OcctWidget* widget, OcctViewport* viewport);
 };

@@ -15,17 +15,72 @@ ViewportController::onResize()
 }
 
 void
-ViewportController::onMouseEvent(QMouseEvent* e)
+ViewportController::onMousePressEvent(QMouseEvent* e)
 {
-	if (!m_viewport->getView())
+	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	// 1. Map Qt Buttons to OCCT Flags
+	// Map Qt button enum to OCCT enum
+	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
+	if (e->button() == Qt::LeftButton)
+	{
+		btn = Aspect_VKeyMouse_LeftButton;
+	}
+	else if (e->button() == Qt::RightButton)
+	{
+		btn = Aspect_VKeyMouse_RightButton;
+	}
+	else if (e->button() == Qt::MiddleButton)
+	{
+		btn = Aspect_VKeyMouse_MiddleButton;
+	}
+
 	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	PressMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
+}
+
+void
+ViewportController::onMouseReleaseEvent(QMouseEvent* e)
+{
+	if (!m_viewport || !m_viewport->getView())
+	{
+		return;
+	}
+
+	// Map Qt button enum to OCCT enum
+	Aspect_VKeyMouse btn = Aspect_VKeyMouse_NONE;
+	if (e->button() == Qt::LeftButton)
+	{
+		btn = Aspect_VKeyMouse_LeftButton;
+	}
+	else if (e->button() == Qt::RightButton)
+	{
+		btn = Aspect_VKeyMouse_RightButton;
+	}
+	else if (e->button() == Qt::MiddleButton)
+	{
+		btn = Aspect_VKeyMouse_MiddleButton;
+	}
+
+	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	ReleaseMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
+	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
+}
+
+void
+ViewportController::onMouseMoveEvent(QMouseEvent* e)
+{
+	if (!m_viewport || !m_viewport->getView())
+	{
+		return;
+	}
+
+	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	// Aggregate all pressed buttons during motion
 	Aspect_VKeyMouse buttons = Aspect_VKeyMouse_NONE;
-	Aspect_VKeyFlags flags = Aspect_VKeyFlags_NONE;
 
 	if (e->buttons() & Qt::LeftButton)
 	{
@@ -39,25 +94,8 @@ ViewportController::onMouseEvent(QMouseEvent* e)
 	{
 		buttons |= Aspect_VKeyMouse_MiddleButton;
 	}
-	if (e->modifiers() & Qt::ShiftModifier)
-	{
-		flags |= Aspect_VKeyFlags_SHIFT;
-	}
-	if (e->modifiers() & Qt::ControlModifier)
-	{
-		flags |= Aspect_VKeyFlags_CTRL;
-	}
 
-	// 2. Let AIS_ViewController update internal state (Mouse position, etc.)
-	UpdateMousePosition(pos, buttons, flags, false);
-
-	// 3. Handle Click/Press/Release logic if needed (handled internally by FlushViewEvents usually)
-	if (e->type() == QEvent::MouseButtonPress)
-	{
-		ProcessInput();
-	}
-
-	// 4. Apply the changes to the View (Orbit, Pan, Zoom, Select)
+	UpdateMousePosition(pos, buttons, Aspect_VKeyFlags_NONE, false);
 	FlushViewEvents(m_viewport->getContext(), m_viewport->getView(), true);
 }
 
@@ -69,8 +107,8 @@ ViewportController::onWheelEvent(QWheelEvent* e)
 		return;
 	}
 
-	// Standard Zoom Scaling from viewer.cpp
 	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	// Convert wheel delta to normalized zoom speed (angleDelta ~ 120 per tick)
 	double delta = e->angleDelta().y() / 8.0 / 15.0;
 
 	UpdateMouseScroll(Aspect_ScrollDelta(pos, delta, Aspect_VKeyFlags_NONE));
@@ -80,8 +118,6 @@ ViewportController::onWheelEvent(QWheelEvent* e)
 void
 ViewportController::onKeyEvent(QKeyEvent* e)
 {
-	// PRESERVED LOGIC: Key bindings from viewerInteractor.cpp
-
 	switch (e->key())
 	{
 		case Qt::Key_F:
@@ -96,14 +132,13 @@ ViewportController::onKeyEvent(QKeyEvent* e)
 			break;
 
 		case Qt::Key_S:
-			m_viewport->setShadingMode(false); // Shaded
+			m_viewport->setShadingMode(false);
 			break;
 
 		case Qt::Key_W:
-			m_viewport->setShadingMode(true); // Wireframe
+			m_viewport->setShadingMode(true);
 			break;
 
-		// --- Axonometric Views ---
 		case Qt::Key_Backspace:
 			m_viewport->setViewPreset(V3d_XposYnegZpos);
 			break;
