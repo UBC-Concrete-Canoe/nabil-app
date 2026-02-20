@@ -43,6 +43,10 @@
 						ninja
 						pkg-config
 						gdb
+
+						# Formatter
+						cmake-format
+						clang-tools
 					];
 					
 					buildInputs = with pkgs; [
