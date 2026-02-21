@@ -60,8 +60,6 @@ if(APPLE)
     )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AppKit" "-framework OpenGL")
-    add_link_options("-Wl,-no_pie")
-    add_compile_options("-mcmodel=large")
 endif()
 
 if(WIN32)
