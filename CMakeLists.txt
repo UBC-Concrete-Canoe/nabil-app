@@ -79,16 +79,24 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 vtk_module_autoinit(TARGETS ${PROJECT_NAME} MODULES ${VTK_LIBRARIES})
 
 # 9. Windows Deployment (Post-Build)
-if(WIN32)
-    find_program(WINDEPLOYQT_EXE NAMES windeployqt.exe windeployqt
-        PATHS "${Qt6_DIR}/../../../bin" NO_DEFAULT_PATH)
+if(WIN32 AND TARGET ${PROJECT_NAME})
+    find_program(
+        WINDEPLOYQT_EXE
+        NAMES windeployqt.exe windeployqt
+        PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/Qt6/bin"
+              "${Qt6_DIR}/../../../bin"
+        NO_DEFAULT_PATH)
 
     if(WINDEPLOYQT_EXE)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND $<$<CONFIG:Release>:${WINDEPLOYQT_EXE}> 
-                    --no-compiler-runtime --verbose 0 
-                    $<TARGET_FILE:${PROJECT_NAME}>
-            COMMENT "Deploying Qt dependencies..."
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND
+                $<$<CONFIG:Release>:${WINDEPLOYQT_EXE}>
+                $<$<CONFIG:Release>:--no-compiler-runtime>
+                $<$<CONFIG:Release>:--verbose> $<$<CONFIG:Release>:0>
+                $<$<CONFIG:Release>:$<TARGET_FILE:${PROJECT_NAME}>>
+            COMMENT "Running windeployqt for Release build..."
             VERBATIM)
     endif()
 endif()
