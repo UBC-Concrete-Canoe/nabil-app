@@ -35,6 +35,10 @@ public:
 	 */
 	void initialize(WId windowHandle);
 
+	//Added by Owen - Tells OcctViewport how to share its context so that the render can be shown in planar and 3D views
+	//Handle(AIS_InteractiveContext) getContext() const { return myContext; }
+    void initialize(WId windowHandle, Handle(AIS_InteractiveContext) sharedContext);
+
 	/**
 	 * @brief Display a shape in the viewport.
 	 *
@@ -90,6 +94,7 @@ public:
 	Handle(V3d_View) getView() { return myView; }
 
 private:
+	void setupView(WId windowHandle);
 	Handle(V3d_Viewer) myViewer;
 	Handle(V3d_View) myView;
 	Handle(AIS_InteractiveContext) myContext;

@@ -18,7 +18,8 @@
 			"cacheVariables": {
 				"VCPKG_TARGET_TRIPLET": "x64-windows",
 				"VCPKG_FEATURE_FLAGS": "manifests",
-				"CMAKE_BUILD_TYPE": "Debug"
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_TOOLCHAIN_FILE": "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/vcpkg/scripts/buildsystems/vcpkg.cmake"
 			}
 		},
 		{
