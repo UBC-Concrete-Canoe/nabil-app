@@ -1,4 +1,3 @@
-// filepath: c:\Users\RemoteAccess\Documents\ConcreteCanoe\placeholder-software\src\render\WireframeManager.cpp
 
 #include "WireframeManager.h"
 #include <AIS_InteractiveContext.hxx>

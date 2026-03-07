@@ -19,6 +19,37 @@
 
 class HullModel; //to avoid dependancy
 
+//interface for observer pattern
 
+class IHullModelObserver {
+    public:
+        virtual ~IHullObserver() = default;
+
+        virtual void onControlPointMoved() = 0; //called when the hull model is updated
+};
+
+class WireframeManager : public IHullModelObserver {
+    public:
+        WireframeManager(const Handle(AIS_InteractiveContext)& context, const std::shared_ptr<HullModel>& hullModel);
+        ~WireframeManager() override;
+
+        void BuildLattice(); //builds the initial lattice based on the hull model
+
+        void onControlPointMoved(int uIndex, int vIndex) override; //called when the hull model is updated
+
+    private:
+
+        void UpdateURowPolylines(int uIndex); //updates the AIS_Polyline objects for a specific U row of control points
+        void UpdateVRowPolylines(int vIndex); //updates the AIS_Polyline objects for a specific V row of control points
+
+        // core data
+        Handle(AIS_InteractiveContext) m_context; //OCCT interactive context for rendering
+        std::shared_ptr<HullModel> m_hullModel; //reference to the hull model for accessing control points and hull lines
+
+        //occt object storage
+        std::vector<Handle(AIS_Polyline)> m_controlPointLines; //AIS_Polyline objects representing control point connections
+        std::vector<Handle(AIS_Polyline)> m_hullLines; //AIS_Polyline objects representing hull lines
+
+};
 
 
