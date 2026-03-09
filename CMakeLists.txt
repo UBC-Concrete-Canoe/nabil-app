@@ -35,7 +35,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/MainWindow.cpp 
     src/ui/OcctWidget.cpp 
     src/core/HullModel.cpp
-    src/core/ControlPoint.cpp
     src/render/OcctViewport.cpp
     
     src/ui/MainWindow.ui
