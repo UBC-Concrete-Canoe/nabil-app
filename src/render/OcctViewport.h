@@ -35,8 +35,17 @@ public:
 	 */
 	void initialize(WId windowHandle);
 
-	//Added by Owen - Tells OcctViewport how to share its context so that the render can be shown in planar and 3D views
-	//Handle(AIS_InteractiveContext) getContext() const { return myContext; }
+	/**
+	 * @brief Tells OcctViewport how to copy the render to other views.
+	 * 
+	 * Obtains the context of the main 3D viewport, and passes this 
+	 * context to other viewports.
+	 * Ensures all viewports are displaying the same object rather than
+	 * several copies of the object.
+	 * 
+	 * @param windowHandle Native window handle from Qt (WId)
+	 * @param sharedContext The interactive context from the "main" 3D view.
+	 */
     void initialize(WId windowHandle, Handle(AIS_InteractiveContext) sharedContext);
 
 	/**
