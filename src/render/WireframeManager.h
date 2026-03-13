@@ -23,9 +23,9 @@ class HullModel; //to avoid dependancy
 
 class IHullModelObserver {
     public:
-        virtual ~IHullObserver() = default;
+        virtual ~IHulModelObserver() = default;
 
-        virtual void onControlPointMoved() = 0; //called when the hull model is updated
+        virtual void onControlPointMoved(int uIndex, int vIndex) = 0; //called when the hull model is updated
 };
 
 class WireframeManager : public IHullModelObserver {
