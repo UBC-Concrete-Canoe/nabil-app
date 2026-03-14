@@ -1,4 +1,5 @@
 #include <QWindow>
+#include <memory>
 #include "MainWindow.h"
 #include "app/Application.h"
 #include "app/ViewportController.h"
@@ -39,13 +40,13 @@ class ViewportManager {
     void set_planars();
 
     private:
-    OcctViewport* persp_viewport;
-    OcctViewport* plan_viewport;
-    OcctViewport* profile_viewport;
-    OcctViewport* bodyplan_viewport;
+    std::unique_ptr<OcctViewport> persp_viewport;
+    std::unique_ptr<OcctViewport> plan_viewport;
+    std::unique_ptr<OcctViewport> profile_viewport;
+    std::unique_ptr<OcctViewport> bodyplan_viewport;
 
-    ViewportController* persp_controller;
-    ViewportController* plan_controller;
-    ViewportController* profile_controller;
-    ViewportController* bodyplan_controller;
+    std::unique_ptr<ViewportController> persp_controller;
+    std::unique_ptr<ViewportController> plan_controller;
+    std::unique_ptr<ViewportController> profile_controller;
+    std::unique_ptr<ViewportController> bodyplan_controller;
 };

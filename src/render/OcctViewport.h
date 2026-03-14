@@ -6,6 +6,7 @@
 #include <TopoDS_Shape.hxx>
 #include <V3d_View.hxx>
 #include <V3d_Viewer.hxx>
+#include <WNT_Window.hxx>
 
 /**
  * @brief The rendering engine layer for OpenCascade viewport.
@@ -14,7 +15,8 @@
  * - Displaying and removing geometry (TopoDS_Shape objects)
  * - Viewport transformations (fitting, zoom, pan, rotate)
  * - Display mode control (shaded vs wireframe)
- * - View preset configurations (top, bottom, front, side views)
+ * - View pre
+ *  configurations (top, bottom, front, side views)
  */
 class OcctViewport
 {
@@ -103,7 +105,7 @@ public:
 	Handle(V3d_View) getView() { return myView; }
 
 private:
-	void setupView(WId windowHandle);
+	void setupView(WId windowHandle, Handle(WNT_Window) wind);
 	Handle(V3d_Viewer) myViewer;
 	Handle(V3d_View) myView;
 	Handle(AIS_InteractiveContext) myContext;

@@ -1,32 +1,19 @@
+#include <memory>
 #include "OcctWidget.h"
 #include "ViewportManager.h"
 
 ViewportManager::ViewportManager() {
     //Create viewports
-    persp_viewport = new OcctViewport();
-	plan_viewport = new OcctViewport();
-	profile_viewport = new OcctViewport();
-	bodyplan_viewport = new OcctViewport();
+    persp_viewport = std::make_unique<OcctViewport>();
+	plan_viewport = std::make_unique<OcctViewport>();
+	profile_viewport = std::make_unique<OcctViewport>();
+	bodyplan_viewport = std::make_unique<OcctViewport>();
 
     // Create the controllers to handle user input
-	persp_controller = new ViewportController(persp_viewport);
-	plan_controller = new ViewportController(plan_viewport);
-	profile_controller = new ViewportController(profile_viewport);
-	bodyplan_controller = new ViewportController(bodyplan_viewport);
-}
-
-ViewportManager::~ViewportManager() {
-    delete persp_viewport;
-    persp_controller;
-
-    delete plan_viewport;
-    delete plan_controller;
-
-    delete profile_viewport;
-    delete profile_controller;
-
-    delete bodyplan_viewport;
-    delete bodyplan_controller;
+	persp_controller = std::make_unique<ViewportController>(persp_viewport.get());
+	plan_controller = std::make_unique<ViewportController>(plan_viewport.get());
+	profile_controller = std::make_unique<ViewportController>(profile_viewport.get());
+	bodyplan_controller = std::make_unique<ViewportController>(bodyplan_viewport.get());
 }
 
 void ViewportManager::initializeViewport(MainWindow* window) {
@@ -43,10 +30,10 @@ void ViewportManager::initializeViewport(MainWindow* window) {
 	(void)bodyplan_widget->winId();
 
     //Connect widgets to input controllers
-    persp_widget->setController(persp_controller);
-	plan_widget->setController(plan_controller);
-	profile_widget->setController(profile_controller);
-	bodyplan_widget->setController(bodyplan_controller);
+    persp_widget->setController(persp_controller.get());
+	plan_widget->setController(plan_controller.get());
+	profile_widget->setController(profile_controller.get());
+	bodyplan_widget->setController(bodyplan_controller.get());
 
     // Initialize OCCT within the widget's native window
 	persp_viewport->initialize(persp_widget->winId());
