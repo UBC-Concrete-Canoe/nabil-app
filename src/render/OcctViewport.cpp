@@ -69,14 +69,11 @@ OcctViewport::setupView(WId windowHandle)
 	// Embed the view into the Qt widget's native window handle
 	#ifdef _WIN32
 		Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
-	#elif defined(Q_OS_LINUX)
-		// Display connection can be found from the graphic driver
-		Handle(Aspect_DisplayConnection) displayConnection = myViewer->Driver()->GetDisplayConnection();
-		Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
 	#elif defined(Q_OS_MAC)
 		Handle(Cocoa_Window) wind = new Cocoa_Window((NSView*)windowHandle);
 	#else
-		// We should just throw an error here, in case it's some esoteric os
+		// Display connection can be found from the graphic driver
+		Handle(Aspect_DisplayConnection) displayConnection = myViewer->Driver()->GetDisplayConnection();
 		Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
 	#endif
 
