@@ -6,6 +6,7 @@
 #include <TopoDS_Shape.hxx>
 #include <V3d_View.hxx>
 #include <V3d_Viewer.hxx>
+#include <WNT_Window.hxx>
 
 /**
  * @brief The rendering engine layer for OpenCascade viewport.
@@ -14,7 +15,8 @@
  * - Displaying and removing geometry (TopoDS_Shape objects)
  * - Viewport transformations (fitting, zoom, pan, rotate)
  * - Display mode control (shaded vs wireframe)
- * - View preset configurations (top, bottom, front, side views)
+ * - View pre
+ *  configurations (top, bottom, front, side views)
  */
 class OcctViewport
 {
@@ -34,6 +36,19 @@ public:
 	 * @param windowHandle Native window handle from Qt (WId)
 	 */
 	void initialize(WId windowHandle);
+
+	/**
+	 * @brief Tells OcctViewport how to copy the render to other views.
+	 * 
+	 * Obtains the context of the main 3D viewport, and passes this 
+	 * context to other viewports.
+	 * Ensures all viewports are displaying the same object rather than
+	 * several copies of the object.
+	 * 
+	 * @param windowHandle Native window handle from Qt (WId)
+	 * @param sharedContext The interactive context from the "main" 3D view.
+	 */
+    void initialize(WId windowHandle, Handle(AIS_InteractiveContext) sharedContext);
 
 	/**
 	 * @brief Display a shape in the viewport.
@@ -90,6 +105,7 @@ public:
 	Handle(V3d_View) getView() { return myView; }
 
 private:
+	void setupView(WId windowHandle);
 	Handle(V3d_Viewer) myViewer;
 	Handle(V3d_View) myView;
 	Handle(AIS_InteractiveContext) myContext;

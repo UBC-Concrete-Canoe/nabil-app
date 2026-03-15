@@ -18,6 +18,7 @@
 
 OcctViewport::OcctViewport() {}
 
+//Initialize 1: Create the main 3D render
 void
 OcctViewport::initialize(WId windowHandle)
 {
@@ -41,22 +42,40 @@ OcctViewport::initialize(WId windowHandle)
 	myContext = new AIS_InteractiveContext(myViewer);
 	myContext->DefaultDrawer()->SetFaceBoundaryDraw(true);
 
-	// Create the view
 	myView = myViewer->CreateView();
+
+	setupView(windowHandle); //Embed into Qt's window handle
+}
+
+//Initialize 2: Create the planar renders
+void
+OcctViewport::initialize(WId windowHandle, Handle(AIS_InteractiveContext) sharedContext)
+{
+	myContext = sharedContext; //Instead of creating a new context, it uses the shared one which allows all views to sync up
+	myViewer = myContext->CurrentViewer();
+	myView = myViewer->CreateView();
+
+	setupView(windowHandle); //Embed into Qt's window handle
+}
+
+//Embed into Qt's window handle, placed here to reduce clutter
+void
+OcctViewport::setupView(WId windowHandle)
+{
 	myView->SetImmediateUpdate(false);
 	myView->SetShadingModel(V3d_PHONG);
 	myView->SetBackgroundColor(Quantity_NOC_BLACK);
 
 	// Embed the view into the Qt widget's native window handle
-#ifdef _WIN32
-	Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
-#elif defined(Q_OS_LINUX)
-	Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
-#elif defined(Q_OS_MAC)
-	Handle(Cocoa_Window) wind = new Cocoa_Window((NSView*)windowHandle);
-#else
-	Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
-#endif
+	#ifdef _WIN32
+		Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
+	#elif defined(Q_OS_MAC)
+		Handle(Cocoa_Window) wind = new Cocoa_Window((NSView*)windowHandle);
+	#else
+		// Display connection can be found from the graphic driver
+		Handle(Aspect_DisplayConnection) displayConnection = myViewer->Driver()->GetDisplayConnection();
+		Handle(Xw_Window) wind = new Xw_Window(displayConnection, (Aspect_Drawable)windowHandle);
+	#endif
 
 	myView->SetWindow(wind);
 	if (!wind->IsMapped())
