@@ -88,6 +88,10 @@ void
 WireframeManager::onEdgeAdded(int edgeId)
 {
 	updateEdge(edgeId);
+	if (!m_context.IsNull())
+	{
+		m_context->UpdateCurrentViewer();
+	}
 }
 
 void
