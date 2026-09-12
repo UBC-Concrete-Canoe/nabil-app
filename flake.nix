@@ -15,10 +15,25 @@
 				# Is it really necessary to do it this way? Well idk :shrug:
 				# Likely not, but it's working for me, so might as well right?
 
-				occCustom = pkgs.callPackage ./NixModules/opencascade.nix {};
+				# OCCT 7.9.3 without vtk support
+				occBase = pkgs.callPackage ./NixModules/opencascade.nix {
+					withVtk = false;
+				};
+
+				# Link VTK to OCCT 7.9.3
+				vtkCustom = pkgs.vtkWithQt6.override {
+					opencascade-occt = occBase;
+				};
+
+				# Build for OCCT 7.9.3, linking against the new vtkCustom
+				occCustom = pkgs.callPackage ./NixModules/opencascade.nix {
+					vtk = vtkCustom;
+					withVtk = true;
+				};
 			in
 			{
 				packages.opencascade-occt = occCustom;
+				packages.vtkWithQt6 = vtkCustom;
 
 				devShells.default = pkgs.mkShell {
 					nativeBuildInputs = with pkgs; [
@@ -41,6 +56,7 @@
 						qt6.wrapQtAppsHook # Set Qt envvars
 
 						self'.packages.opencascade-occt
+						self'.packages.vtkWithQt6
 					]
 					++ lib.optionals stdenv.isLinux [
 						qt6.qtwayland

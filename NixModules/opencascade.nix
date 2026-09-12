@@ -1,5 +1,6 @@
 # Taken from https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/op/opencascade-occt/package.nix 
 # Updated for 7.9.3
+# NOTE: VTK relies on OCCT, so if you wanna use this, override vtk to use this too
 {
 	lib,
 	stdenv,
@@ -17,6 +18,8 @@
 	libXext,
 	libXmu,
 	libXi,
+	vtk,
+	withVtk ? false,
 }:
 stdenv.mkDerivation rec {
 	pname = "opencascade-occt";
@@ -36,7 +39,8 @@ stdenv.mkDerivation rec {
 		#	url = "https://github.com/Open-Cascade-SAS/OCCT/commit/7236e83dcc1e7284e66dc61e612154617ef715d6.diff";
 		#	hash = "sha256-NoC2mE3DG78Y0c9UWonx1vmXoU4g5XxFUT3eVXqLU60=";
 		#})
-	];
+	]
+	++ lib.optional withVtk vtk;
 
 	nativeBuildInputs = [
 		cmake
@@ -67,6 +71,10 @@ stdenv.mkDerivation rec {
 
 		# Use freetype
 		(lib.cmakeBool "USE_FREETYPE" true)
+	]
+	++ lib.optionals withVtk [
+		(lib.cmakeBool "USE_VTK" true)
+		(lib.cmakeFeature "3RDPARTY_VTK_INCLUDE_DIR" "${lib.getDev vtk}/include/vtk")
 
 	meta = {
 		description = "Open CASCADE Technology, libraries for 3D modeling and numerical simulation";

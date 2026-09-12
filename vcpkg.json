@@ -5,7 +5,8 @@
     {
       "name": "opencascade",
       "features": [
-        "freetype"
+        "freetype",
+        "vtk"
       ]
     },
     {
@@ -14,6 +15,13 @@
         "gui",
         "opengl",
         "widgets"
+      ]
+    },
+    {
+      "name": "vtk",
+      "features": [
+        "opengl",
+        "qt"
       ]
     }
   ]
