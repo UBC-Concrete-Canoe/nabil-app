@@ -15,21 +15,32 @@
 class WireframeManager : public IHullModelObserver
 {
 public:
+	/**
+	 * @brief Observe a hull model and render its edges in an OCCT context.
+	 * @param context OCCT interactive context used for display.
+	 * @param hullModel Model whose control edges are rendered.
+	 */
 	WireframeManager(
 		const Handle(AIS_InteractiveContext)& context,
 		const std::shared_ptr<HullModel>& hullModel
 	);
+
+	//! Remove rendered edges and detach from the model observer list.
 	~WireframeManager() override;
 
-	//! Rebuild all rendered edges from the model.
+	//! Rebuild all rendered edges from the current model topology.
 	void build();
 
-	//! Temporary compatibility name for callers from the lattice prototype.
+	//! Compatibility alias for callers from the lattice prototype.
 	void BuildLattice() { build(); }
 
+	//! Refresh edges incident to a moved control point.
 	void onControlPointMoved(int pointId) override;
+	//! Render a newly added control edge.
 	void onEdgeAdded(int edgeId) override;
+	//! Remove a deleted control edge from the viewer.
 	void onEdgeRemoved(int edgeId) override;
+	//! Rebuild all rendered edges after a model reset.
 	void onModelReset() override;
 
 private:
