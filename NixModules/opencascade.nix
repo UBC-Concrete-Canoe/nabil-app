@@ -39,8 +39,7 @@ stdenv.mkDerivation rec {
 		#	url = "https://github.com/Open-Cascade-SAS/OCCT/commit/7236e83dcc1e7284e66dc61e612154617ef715d6.diff";
 		#	hash = "sha256-NoC2mE3DG78Y0c9UWonx1vmXoU4g5XxFUT3eVXqLU60=";
 		#})
-	]
-	++ lib.optional withVtk vtk;
+	];
 
 	nativeBuildInputs = [
 		cmake
@@ -58,7 +57,8 @@ stdenv.mkDerivation rec {
 		rapidjson
 		freetype
 		fontconfig
-	];
+	]
+	++ lib.optional withVtk vtk;
 
 	env.NIX_CFLAGS_COMPILE = "-fpermissive";
 	cmakeFlags = [
@@ -75,6 +75,7 @@ stdenv.mkDerivation rec {
 	++ lib.optionals withVtk [
 		(lib.cmakeBool "USE_VTK" true)
 		(lib.cmakeFeature "3RDPARTY_VTK_INCLUDE_DIR" "${lib.getDev vtk}/include/vtk")
+	];
 
 	meta = {
 		description = "Open CASCADE Technology, libraries for 3D modeling and numerical simulation";
