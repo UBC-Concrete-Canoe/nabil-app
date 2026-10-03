@@ -34,14 +34,31 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/app/ViewportController.cpp
     src/ui/MainWindow.cpp 
     src/ui/OcctWidget.cpp 
+    src/ui/ViewportManager.cpp
     src/core/HullModel.cpp
     src/render/OcctViewport.cpp
+    src/render/VisualPoint.cpp
+    src/render/WireframeManager.cpp
     
     src/ui/MainWindow.ui
     src/ui/images.qrc
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(hull_model_tests
+        tests/HullModelTests.cpp
+        src/core/HullModel.cpp
+    )
+    target_include_directories(hull_model_tests PRIVATE
+        src
+        ${OpenCASCADE_INCLUDE_DIR}
+    )
+    target_link_libraries(hull_model_tests PRIVATE TKernel TKMath)
+    add_test(NAME hull_model_topology COMMAND hull_model_tests)
+endif()
 
 # 5. Platform Specifics
 if(APPLE)
@@ -75,7 +92,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     # OCCT Libraries
     TKernel TKMath TKG2d TKG3d TKGeomBase
     TKBRep TKTopAlgo TKPrim TKService TKV3d TKOpenGl
-    
+
     # VTK Libraries (explicit list avoids over-linking/auto-init issues)
     VTK::CommonCore
     VTK::CommonDataModel
