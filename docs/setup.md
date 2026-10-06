@@ -1,8 +1,11 @@
 # Nabil App Setup Guide
 
-This guide covers setting up your local development environment, installing dependencies via `vcpkg`, and configuring/building the project using CMake presets on Windows and macOS.
+This guide covers setting up your local development environment and configuring/building the project using CMake presets on Windows and macOS.
 
-> **Storage & Time Warning:**  
+* **Windows** installs all dependencies via `vcpkg` (built from source).
+* **macOS** installs dependencies via **Homebrew** (prebuilt binaries — much faster).
+
+> **Storage & Time Warning (vcpkg versions):**  
 > Ensure you have at least **100 GB of free disk space**. Initial configuration installs all dependencies via `vcpkg`, which can take several hours depending on your machine.
 
 ---
@@ -137,11 +140,12 @@ If CMake behaves unexpectedly or fails to detect compilers:
 
 ## macOS Setup
 
+Using homebrew is faster and takes up less storage. Also using vcpkg makes us use latest version of OCCT, while flake.nix mnetions that we should 7.9.3.
+
 ### Prerequisites
 
 * **Xcode**: Full installation from the App Store.
 * **Homebrew**: Installed via [brew.sh](https://brew.sh/).
-* At least **100 GB** of available disk space.
 
 ---
 
@@ -161,31 +165,23 @@ If CMake behaves unexpectedly or fails to detect compilers:
    ```
    *If any tool is missing, install it via Homebrew (e.g., `brew install cmake`).*
 
-3. **Install build utilities:**
+3. **Install build tools and project dependencies:**
    ```bash
-   brew install ninja pkg-config autoconf automake libtool autoconf-archive
+   brew install cmake ninja pkg-config opencascade qt vtk
    ```
 
-4. **Install vcpkg:**
-   ```bash
-   git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
-   cd ~/vcpkg
-   ./bootstrap-vcpkg.sh
-   ~/vcpkg/vcpkg version
-   ```
-
-   > **Note:** If you encounter libtool errors during builds, export the GNU tool path:
+   > **Note:** `brew upgrade` can bump `opencascade` to a newer major version (8.x) that changes deprecated APIs. To stay on 7.9.3, pin it:
    > ```bash
-   > export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
+   > brew pin opencascade
    > ```
 
-5. **Clone the repository:**
+4. **Clone the repository:**
    ```bash
    git clone https://github.com/UBC-Concrete-Canoe/nabil-app
    cd nabil-app
    ```
 
-6. **Create `CMakeUserPresets.json`:**  
+5. **Create `CMakeUserPresets.json`:**  
    In the root of the project, create `CMakeUserPresets.json`:
 
    ```json
@@ -193,41 +189,48 @@ If CMake behaves unexpectedly or fails to detect compilers:
      "version": 3,
      "configurePresets": [
        {
-         "name": "macos-vcpkg-release",
-         "inherits": "ninja-vcpkg-release",
+         "name": "macos-brew-release",
+         "generator": "Ninja",
+         "binaryDir": "${sourceDir}/build/brew-release",
          "cacheVariables": {
-           "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-           "VCPKG_TARGET_TRIPLET": "arm64-osx"
+           "CMAKE_BUILD_TYPE": "Release",
+           "CMAKE_PREFIX_PATH": "/opt/homebrew;/opt/homebrew/opt/opencascade;/opt/homebrew/opt/qtbase;/opt/homebrew/opt/vtk"
          }
        },
        {
-         "name": "macos-vcpkg-debug",
-         "inherits": "ninja-vcpkg-debug",
+         "name": "macos-brew-debug",
+         "generator": "Ninja",
+         "binaryDir": "${sourceDir}/build/brew-debug",
          "cacheVariables": {
-           "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-           "VCPKG_TARGET_TRIPLET": "arm64-osx"
+           "CMAKE_BUILD_TYPE": "Debug",
+           "CMAKE_PREFIX_PATH": "/opt/homebrew;/opt/homebrew/opt/opencascade;/opt/homebrew/opt/qtbase;/opt/homebrew/opt/vtk"
          }
        }
      ],
      "buildPresets": [
        {
-         "name": "macos-build-release",
-         "configurePreset": "macos-vcpkg-release"
+         "name": "macos-brew-build-release",
+         "configurePreset": "macos-brew-release"
        },
        {
-         "name": "macos-build-debug",
-         "configurePreset": "macos-vcpkg-debug"
+         "name": "macos-brew-build-debug",
+         "configurePreset": "macos-brew-debug"
        }
      ]
    }
    ```
 
-7. **Configure:**
+6. **Configure:**
    ```bash
-   cmake --preset macos-vcpkg-release
+   cmake --preset macos-brew-release
    ```
 
-8. **Build:**
+7. **Build:**
    ```bash
-   cmake --build --preset macos-build-release
+   cmake --build --preset macos-brew-build-release
+   ```
+
+8. **Run:**  
+   ```bash
+   open ./build/brew-release/coco.app
    ```
