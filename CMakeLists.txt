@@ -48,6 +48,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 include(CTest)
 if(BUILD_TESTING)
+    find_package(GTest REQUIRED)
+
     add_executable(hull_model_tests
         tests/HullModelTests.cpp
         src/core/HullModel.cpp
@@ -56,8 +58,14 @@ if(BUILD_TESTING)
         src
         ${OpenCASCADE_INCLUDE_DIR}
     )
-    target_link_libraries(hull_model_tests PRIVATE TKernel TKMath)
-    add_test(NAME hull_model_topology COMMAND hull_model_tests)
+    target_link_libraries(hull_model_tests PRIVATE
+        TKernel TKMath
+        GTest::gtest_main
+        GTest::gmock
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(hull_model_tests)
 endif()
 
 # 5. Platform Specifics
