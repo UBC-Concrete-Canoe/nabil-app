@@ -1,9 +1,9 @@
 # Nabil App Setup Guide
 
-This guide covers setting up your local development environment, installing dependencies via `vcpkg`, and configuring/building the project using CMake presets on Windows and macOS.
+This guide covers setting up your local development environment and configuring/building the project using CMake presets. On **Windows** dependencies come from `vcpkg`; on **macOS** they come from Homebrew (`brew`).
 
-> **Storage & Time Warning:**  
-> Ensure you have at least **100 GB of free disk space**. Initial configuration installs all dependencies via `vcpkg`, which can take several hours depending on your machine.
+> **Storage & Time Warning (Windows/vcpkg only):**  
+> The `vcpkg` path needs at least **100 GB of free disk space**, and the initial dependency build can take several hours. The macOS/Homebrew path is much lighter: it uses prebuilt bottles plus one ~10 minute source build of OCCT.
 
 ---
 
@@ -137,11 +137,13 @@ If CMake behaves unexpectedly or fails to detect compilers:
 
 ## macOS Setup
 
+macOS builds use **Homebrew** for all dependencies (Qt6, VTK, OCCT) — no `vcpkg` required. The brew-based presets are committed in `CMakePresets.json` (`macos-brew-release` / `macos-brew-debug`), so no local preset file is needed.
+
 ### Prerequisites
 
 * **Xcode**: Full installation from the App Store.
 * **Homebrew**: Installed via [brew.sh](https://brew.sh/).
-* At least **100 GB** of available disk space.
+* At least **10 GB** of available disk space.
 
 ---
 
@@ -153,81 +155,48 @@ If CMake behaves unexpectedly or fails to detect compilers:
    sudo xcodebuild -license accept
    ```
 
-2. **Verify standard toolchains:**
-   ```bash
-   cmake --version
-   make --version
-   clang --version
-   ```
-   *If any tool is missing, install it via Homebrew (e.g., `brew install cmake`).*
-
-3. **Install build utilities:**
-   ```bash
-   brew install ninja pkg-config autoconf automake libtool autoconf-archive
-   ```
-
-4. **Install vcpkg:**
-   ```bash
-   git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
-   cd ~/vcpkg
-   ./bootstrap-vcpkg.sh
-   ~/vcpkg/vcpkg version
-   ```
-
-   > **Note:** If you encounter libtool errors during builds, export the GNU tool path:
-   > ```bash
-   > export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
-   > ```
-
-5. **Clone the repository:**
+2. **Clone the repository:**
    ```bash
    git clone https://github.com/UBC-Concrete-Canoe/nabil-app
    cd nabil-app
    ```
 
-6. **Create `CMakeUserPresets.json`:**  
-   In the root of the project, create `CMakeUserPresets.json`:
-
-   ```json
-   {
-     "version": 3,
-     "configurePresets": [
-       {
-         "name": "macos-vcpkg-release",
-         "inherits": "ninja-vcpkg-release",
-         "cacheVariables": {
-           "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-           "VCPKG_TARGET_TRIPLET": "arm64-osx"
-         }
-       },
-       {
-         "name": "macos-vcpkg-debug",
-         "inherits": "ninja-vcpkg-debug",
-         "cacheVariables": {
-           "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-           "VCPKG_TARGET_TRIPLET": "arm64-osx"
-         }
-       }
-     ],
-     "buildPresets": [
-       {
-         "name": "macos-build-release",
-         "configurePreset": "macos-vcpkg-release"
-       },
-       {
-         "name": "macos-build-debug",
-         "configurePreset": "macos-vcpkg-debug"
-       }
-     ]
-   }
-   ```
-
-7. **Configure:**
+3. **Install build tools and dependencies:**
    ```bash
-   cmake --preset macos-vcpkg-release
+   brew install cmake ninja qt vtk
    ```
 
-8. **Build:**
+4. **Install OCCT 8.0.1 via brew:**
+
+   Homebrew's stock `opencascade` formula still ships 7.9.3, which is too old for this project. This repo vendors the 8.0.1 formula at `packaging/homebrew/opencascade.rb`. Homebrew only installs formulas that live in a tap, so create a local tap and copy it in (run from the repo root):
+
    ```bash
-   cmake --build --preset macos-build-release
+   brew tap-new nabil/occt
+   cp packaging/homebrew/opencascade.rb "$(brew --repository nabil/occt)/Formula/"
+   brew install --build-from-source nabil/occt/opencascade
    ```
+
+   The source build takes roughly 10 minutes on Apple Silicon.
+
+   > **Note:** If a 7.x `opencascade` is already installed, brew refuses to install the tap formula under the same name. Remove the old one first:
+   > ```bash
+   > brew unpin opencascade 2>/dev/null; brew uninstall opencascade
+   > ```
+   > Once homebrew-core ships 8.0.1 you can `brew untap nabil/occt` and use the stock formula instead.
+
+5. **Configure:**
+   ```bash
+   cmake --preset macos-brew-release
+   ```
+   For a debug build use `macos-brew-debug`. Both presets point CMake at `/opt/homebrew/opt/{opencascade,qtbase,vtk}`.
+
+6. **Build:**
+   ```bash
+   cmake --build --preset macos-brew-build-release
+   ```
+
+7. **Run:**
+   ```bash
+   open build/brew-release/coco.app
+   ```
+   (or run the binary directly: `./build/brew-release/coco.app/Contents/MacOS/coco`)
