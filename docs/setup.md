@@ -1,15 +1,82 @@
 # Nabil App Setup Guide
 
-This guide covers setting up your local development environment and configuring/building the project using CMake presets. On **Windows** dependencies come from `vcpkg`; on **macOS** they come from Homebrew (`brew`).
+This guide covers setting up your local development environment and configuring/building the project using CMake presets. On **Windows** dependencies come from `vcpkg`; on **macOS** they come from Homebrew (`brew`); on **Linux** they can come from Nix or the distribution package manager.
 
 > **Storage & Time Warning (Windows/vcpkg only):**  
 > The `vcpkg` path needs at least **100 GB of free disk space**, and the initial dependency build can take several hours. The macOS/Homebrew path is much lighter: it uses prebuilt bottles plus one ~10 minute source build of OCCT.
 
 ---
 
-## Linux Support
+## Linux Setup
 
-Building and running the application on Linux is possible. Because toolchain configurations and dependency requirements vary by distribution, please **contact Nabil** directly to get set up.
+Linux builds use GCC or Clang, CMake, Ninja, Qt 6, VTK, and OpenCASCADE. The Nix flake is the recommended option because it provides the required OpenCASCADE 8.0.1 build and keeps the dependency versions consistent across Linux distributions. Native distribution packages can also be used, but some repositories provide an older OpenCASCADE release.
+
+### NixOS or Nix
+
+NixOS users can use the repository's flake directly. The same instructions work on other Linux distributions with the Nix package manager installed.
+
+1. **Install Nix** using the [official installation instructions](https://nixos.org/download/), if it is not already installed.
+2. **Clone the repository:**
+   ```bash
+   git clone https://github.com/UBC-Concrete-Canoe/nabil-app
+   cd nabil-app
+   ```
+3. **Enter the development shell:**
+   ```bash
+   nix develop
+   ```
+
+   This supplies the compiler, CMake, Ninja, Qt 6, VTK, OpenCASCADE 8.0.1, and the Linux graphics dependencies. Keep this shell active while configuring, building, and running the application.
+
+4. **Configure and build:**
+   ```bash
+   cmake --preset linux-release
+   cmake --build --preset linux-release
+   ```
+
+   Use `linux-debug` instead of `linux-release` for a debug build.
+
+5. **Run:**
+   ```bash
+   ./build/linux-release/coco
+   ```
+
+### Native Distribution Packages
+
+Install the packages for your distribution before configuring the project. The package names below cover the compiler, build tools, Qt 6, VTK with Qt/OpenGL support, OpenCASCADE, and the Linux graphics libraries used by the application.
+
+| Distribution | Install command |
+| --- | --- |
+| Ubuntu/Debian | `sudo apt install build-essential cmake ninja-build pkg-config qt6-base-dev libvtk9-dev libvtk9-qt-dev libocct-foundation-dev libocct-modeling-algorithms-dev libocct-modeling-data-dev libocct-visualization-dev libfreetype-dev libgl-dev libxkbcommon-dev libx11-dev` |
+| Fedora/RHEL | `sudo dnf install gcc-c++ cmake ninja-build pkgconf-pkg-config qt6-qtbase-devel vtk-devel opencascade-devel freetype-devel mesa-libGL-devel libxkbcommon-devel libX11-devel` |
+| Arch/Manjaro | `sudo pacman -S --needed base-devel cmake ninja pkgconf qt6-base vtk opencascade freetype2 libglvnd libxkbcommon libx11` |
+
+Package names and OpenCASCADE versions vary between releases. If your distribution does not provide OpenCASCADE 8.0.1, use the Nix setup above or build/install OpenCASCADE 8.0.1 separately and set `CMAKE_PREFIX_PATH` to its installation prefix.
+
+> **Disclaimer:** The native Linux build has not been tested on Ubuntu or Fedora. If you run into any issues with the Linux setup, please contact Nabil directly.
+
+After installing the native packages:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/UBC-Concrete-Canoe/nabil-app
+   cd nabil-app
+   ```
+2. **Configure and build:**
+   ```bash
+   cmake --preset linux-release
+   cmake --build --preset linux-release
+   ```
+3. **Run:**
+   ```bash
+   ./build/linux-release/coco
+   ```
+
+If CMake cannot locate a dependency installed outside the system prefix, configure with a prefix path, for example:
+
+```bash
+cmake --preset linux-release -DCMAKE_PREFIX_PATH=/path/to/dependencies
+```
 
 ---
 
