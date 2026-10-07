@@ -31,7 +31,7 @@ WireframeManager::~WireframeManager()
 			(void)edgeId;
 			if (!shape.IsNull())
 			{
-				m_context->Remove(shape, Standard_False);
+				m_context->Remove(shape, false);
 			}
 		}
 		m_context->UpdateCurrentViewer();
@@ -51,7 +51,7 @@ WireframeManager::build()
 		(void)edgeId;
 		if (!shape.IsNull())
 		{
-			m_context->Remove(shape, Standard_False);
+			m_context->Remove(shape, false);
 		}
 	}
 	m_edgeShapes.clear();
@@ -126,13 +126,13 @@ WireframeManager::updateEdge(int edgeId)
 		m_edgeShapes.emplace(edgeId, shape);
 		if (m_isVisible)
 		{
-			m_context->Display(shape, Standard_False);
+			m_context->Display(shape, false);
 		}
 		return;
 	}
 
 	found->second->SetShape(renderedEdge);
-	m_context->Redisplay(found->second, Standard_False);
+	m_context->Redisplay(found->second, false);
 }
 
 void
@@ -145,7 +145,7 @@ WireframeManager::removeRenderedEdge(int edgeId, bool updateViewer)
 	}
 	if (!m_context.IsNull() && !found->second.IsNull())
 	{
-		m_context->Remove(found->second, Standard_False);
+		m_context->Remove(found->second, false);
 		if (updateViewer)
 		{
 			m_context->UpdateCurrentViewer();

@@ -14,7 +14,7 @@ IMPLEMENT_STANDARD_RTTIEXT(VisualPoint, AIS_InteractiveObject)
 
 namespace
 {
-constexpr Standard_Real kSyncEpsilon = 1.0e-7;
+constexpr double kSyncEpsilon = 1.0e-7;
 } // namespace
 
 VisualPoint::VisualPoint(const ControlPoint* controlPoint, const ControlPointVisualStyle& style)
@@ -22,8 +22,8 @@ VisualPoint::VisualPoint(const ControlPoint* controlPoint, const ControlPointVis
   , m_cachedPoint(pointFromModel())
   , m_style(style)
 {
-	SetInfiniteState(Standard_False);
-	SetMutable(Standard_True);
+	SetInfiniteState(false);
+	SetMutable(true);
 	SetHilightMode(0);
 	const Handle(Prs3d_Drawer) selectedDrawer =
 		OcctStyleMapper::makePointDrawer(m_style.selectedColor, m_style.selectedMarkerScale);
@@ -64,7 +64,7 @@ void
 VisualPoint::Compute(
 	const Handle(PrsMgr_PresentationManager) &,
 	const Handle(Prs3d_Presentation) & thePrs,
-	const Standard_Integer theMode
+	const int theMode
 )
 {
 	thePrs->Clear();
@@ -97,7 +97,7 @@ VisualPoint::Compute(
 void
 VisualPoint::ComputeSelection(
 	const Handle(SelectMgr_Selection) & theSelection,
-	const Standard_Integer
+	const int
 )
 {
 	Handle(SelectMgr_EntityOwner) owner = new SelectMgr_EntityOwner(this, 10);

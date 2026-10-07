@@ -4,11 +4,11 @@
 
 namespace
 {
-Graphic3d_Vec2i
+NCollection_Vec2<int>
 toNativePixels(const QPointF& pos, qreal devicePixelRatio)
 {
 	const qreal dpr = devicePixelRatio > 0.0 ? devicePixelRatio : 1.0;
-	return Graphic3d_Vec2i(
+	return NCollection_Vec2<int>(
 		static_cast<int>(std::lround(pos.x() * dpr)), static_cast<int>(std::lround(pos.y() * dpr))
 	);
 }
@@ -63,7 +63,7 @@ ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 		btn = Aspect_VKeyMouse_MiddleButton;
 	}
 
-	Graphic3d_Vec2i pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
 	if (e->button() == Qt::LeftButton)
 	{
 		m_leftButtonPressed = true;
@@ -74,7 +74,7 @@ ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 		if (!m_rotationEnabled)
 		{
 			m_viewport->getContext()->MoveTo(
-				pos.x(), pos.y(), m_viewport->getView(), Standard_False
+				pos.x(), pos.y(), m_viewport->getView(), false
 			);
 			synchronizeAndFlush();
 			return;
@@ -92,14 +92,14 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
 		return;
 	}
 
-	Graphic3d_Vec2i pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
 
 	if (!m_rotationEnabled && e->button() == Qt::LeftButton)
 	{
 		if (m_leftButtonPressed && !m_leftButtonDragged)
 		{
 			m_viewport->getContext()->MoveTo(
-				pos.x(), pos.y(), m_viewport->getView(), Standard_False
+				pos.x(), pos.y(), m_viewport->getView(), false
 			);
 			m_viewport->getContext()->SelectDetected(AIS_SelectionScheme_Replace);
 		}
@@ -131,7 +131,7 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
 		if (m_leftButtonPressed && !m_leftButtonDragged)
 		{
 			m_viewport->getContext()->MoveTo(
-				pos.x(), pos.y(), m_viewport->getView(), Standard_False
+				pos.x(), pos.y(), m_viewport->getView(), false
 			);
 			m_viewport->getContext()->SelectDetected(AIS_SelectionScheme_Replace);
 		}
@@ -150,8 +150,8 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
 		return;
 	}
 
-	Graphic3d_Vec2i pos = toNativePixels(e->position(), devicePixelRatio);
-	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), Standard_False);
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), false);
 
 	if (m_leftButtonPressed)
 	{
@@ -196,7 +196,7 @@ ViewportController::onWheelEvent(QWheelEvent* e, qreal devicePixelRatio)
 		return;
 	}
 
-	Graphic3d_Vec2i pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
 	// Convert wheel delta to normalized zoom speed (angleDelta ~ 120 per tick)
 	double delta = e->angleDelta().y() / 8.0 / 15.0;
 

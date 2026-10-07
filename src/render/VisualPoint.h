@@ -56,7 +56,7 @@ protected:
 	void Compute(
 		const Handle(PrsMgr_PresentationManager) & thePrsMgr,
 		const Handle(Prs3d_Presentation) & thePrs,
-		const Standard_Integer theMode
+		const int theMode
 	) override;
 
 	/**
@@ -64,7 +64,7 @@ protected:
 	 */
 	void ComputeSelection(
 		const Handle(SelectMgr_Selection) & theSelection,
-		const Standard_Integer theMode
+		const int theMode
 	) override;
 
 private:

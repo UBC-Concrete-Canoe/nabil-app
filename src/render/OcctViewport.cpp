@@ -96,7 +96,7 @@ void
 OcctViewport::setupView(WId windowHandle)
 {
 	myView->SetImmediateUpdate(false);
-	myView->SetShadingModel(V3d_PHONG);
+	myView->SetShadingModel(Graphic3d_TypeOfShadingModel_Phong);
 	myView->SetBackgroundColor(Quantity_NOC_BLACK);
 
 // Embed the view into the Qt widget's native window handle
@@ -134,8 +134,8 @@ OcctViewport::displayControlPoint(const ControlPoint* point)
 	}
 
 	Handle(VisualPoint) visualPoint = new VisualPoint(point, myControlPointStyle);
-	myContext->Display(visualPoint, Standard_False);
-	myContext->Activate(visualPoint, 0, Standard_False);
+	myContext->Display(visualPoint, false);
+	myContext->Activate(visualPoint, 0, false);
 	myVisualPoints->push_back(visualPoint);
 	myView->FitAll();
 	myContext->UpdateCurrentViewer();
@@ -240,7 +240,7 @@ OcctViewport::synchronizeVisualPoints()
 		point->synchronize();
 		if (before.Distance(point->point()) > 0.0)
 		{
-			myContext->Redisplay(point, Standard_False);
+			myContext->Redisplay(point, false);
 			anyUpdated = true;
 		}
 	}
@@ -271,7 +271,7 @@ OcctViewport::updateVisualPointSelectionStyles()
 		const bool isSelected = myContext->IsSelected(point);
 		if (point->setSelectedStyle(isSelected))
 		{
-			myContext->Redisplay(point, Standard_False);
+			myContext->Redisplay(point, false);
 			anyUpdated = true;
 		}
 	}
