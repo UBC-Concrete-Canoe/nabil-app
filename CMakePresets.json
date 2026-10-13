@@ -40,6 +40,24 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug"
 			}
+		},
+		{
+			"name": "macos-brew-release",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/brew-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"CMAKE_PREFIX_PATH": "/opt/homebrew;/opt/homebrew/opt/opencascade;/opt/homebrew/opt/qtbase;/opt/homebrew/opt/vtk"
+			}
+		},
+		{
+			"name": "macos-brew-debug",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/brew-debug",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_PREFIX_PATH": "/opt/homebrew;/opt/homebrew/opt/opencascade;/opt/homebrew/opt/qtbase;/opt/homebrew/opt/vtk"
+			}
 		}
 	],
 	"buildPresets": [
@@ -62,6 +80,16 @@
 			"name": "linux-debug",
 			"configurePreset": "linux-debug",
 			"description": "Builds project in debug mode, for Linux"
+		},
+		{
+			"name": "macos-brew-build-release",
+			"configurePreset": "macos-brew-release",
+			"description": "Builds project in release mode against Homebrew dependencies (macOS)"
+		},
+		{
+			"name": "macos-brew-build-debug",
+			"configurePreset": "macos-brew-debug",
+			"description": "Builds project in debug mode against Homebrew dependencies (macOS)"
 		}
 	]
 }

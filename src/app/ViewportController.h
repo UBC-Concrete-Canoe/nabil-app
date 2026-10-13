@@ -6,6 +6,7 @@
 
 // Inherit from AIS_ViewController to get standard OCCT mouse math (orbit/zoom/pan calculations)
 #include <AIS_ViewController.hxx>
+#include <NCollection_Vec2.hxx>
 
 /**
  * @brief Controller layer for viewport interaction.
@@ -69,7 +70,7 @@ private:
 	void synchronizeAndFlush();
 	bool m_leftButtonPressed = false;
 	bool m_leftButtonDragged = false;
-	Graphic3d_Vec2i m_leftPressPos = Graphic3d_Vec2i(0, 0);
+	NCollection_Vec2<int> m_leftPressPos = NCollection_Vec2<int>(0, 0);
 	OcctViewport* m_viewport;
 	bool m_rotationEnabled = true;
 };
