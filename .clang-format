@@ -50,4 +50,3 @@ IncludeCategories:
 # Keeps long coordinate initializers readable
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
-...
