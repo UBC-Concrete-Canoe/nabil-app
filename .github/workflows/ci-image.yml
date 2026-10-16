@@ -45,6 +45,6 @@ jobs:
           context: .
           file: ci/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ github.repository }}/ci:latest
+          tags: ghcr.io/ubc-concrete-canoe/nabil-app/ci:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

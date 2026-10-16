@@ -283,7 +283,7 @@ PRs and pushes to `main` run two jobs (`.github/workflows/ci.yml`); both must pa
 
 | Job | How dependencies are provided |
 | --- | --- |
-| **Build & Test (Linux container)** | Runs inside `ghcr.io/UBC-Concrete-Canoe/nabil-app/ci:latest`, a prebuilt image with the toolchain, Qt6, VTK, GTest, and OCCT 8.0.1 already installed. Nothing is installed or compiled per run. |
+| **Build & Test (Linux container)** | Runs inside `ghcr.io/ubc-concrete-canoe/nabil-app/ci:latest`, a prebuilt image with the toolchain, Qt6, VTK, GTest, and OCCT 8.0.1 already installed. Nothing is installed or compiled per run. |
 | **Build & Test (macOS)** | Bottled Homebrew packages (qt, vtk, googletest, …) are installed each run — no compilation — with the download cache preserved between runs. OCCT 8.0.1 is built once by `ci/install-occt.sh` and cached until that script changes. |
 
 ### Updating CI dependencies

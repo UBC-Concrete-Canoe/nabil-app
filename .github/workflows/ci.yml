@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     # Prebuilt image with toolchain + Qt6 + VTK + GTest + OCCT 8.0.1.
     # Rebuilt by ci-image.yml only when ci/Dockerfile changes.
-    container: ghcr.io/${{ github.repository }}/ci:latest
+    container: ghcr.io/ubc-concrete-canoe/nabil-app/ci:latest
     permissions:
       contents: read
       packages: read
