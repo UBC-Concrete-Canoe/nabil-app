@@ -230,8 +230,10 @@ macOS builds use **Homebrew** for all dependencies (Qt6, VTK, OCCT) — no `vcpk
 
 3. **Install build tools and dependencies:**
    ```bash
-   brew install cmake ninja qt vtk
+   brew install cmake ninja qt vtk googletest
    ```
+
+   `googletest` provides the GTest/GMock libraries needed to build the test suite. If you don't need tests you can skip it and configure with `-DBUILD_TESTING=OFF`.
 
 4. **Install OCCT 8.0.1 via brew:**
 
@@ -262,7 +264,12 @@ macOS builds use **Homebrew** for all dependencies (Qt6, VTK, OCCT) — no `vcpk
    cmake --build --preset macos-brew-build-release
    ```
 
-7. **Run:**
+7. **Run the tests (optional):**
+   ```bash
+   ctest --test-dir build/brew-release --output-on-failure
+   ```
+
+8. **Run:**
    ```bash
    open build/brew-release/coco.app
    ```
