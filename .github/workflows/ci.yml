@@ -11,25 +11,69 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test (macOS, Homebrew)
+  linux:
+    name: Build & Test (Linux container)
+    runs-on: ubuntu-latest
+    # Prebuilt image with toolchain + Qt6 + VTK + GTest + OCCT 8.0.1.
+    # Rebuilt by ci-image.yml only when ci/Dockerfile changes.
+    container: ghcr.io/${{ github.repository }}/ci:latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure
+        run: cmake --preset linux-release
+
+      - name: Build
+        run: cmake --build --preset linux-release --parallel
+
+      - name: Test
+        run: ctest --test-dir build/linux-release --output-on-failure
+
+  macos:
+    name: Build & Test (macOS)
     runs-on: macos-latest
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
       HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      OCCT_PREFIX: ${{ github.workspace }}/occt-8.0.1
     steps:
       - uses: actions/checkout@v7
 
+      # Bottle downloads are cached; installing from them is a few seconds
+      # each and needs no compilation.
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: brew-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: brew-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Install dependencies
-        run: brew install ninja opencascade googletest qt vtk
+        run: brew install ninja googletest qt vtk freetype rapidjson tbb fontconfig
+
+      # OCCT 8.0.1 (newer than homebrew-core's 7.9.3) is built once and cached
+      # until ci/install-occt.sh changes.
+      - name: Cache OCCT 8.0.1
+        id: occt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.OCCT_PREFIX }}
+          key: occt-801-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/install-occt.sh') }}
+
+      - name: Build OCCT 8.0.1
+        if: steps.occt-cache.outputs.cache-hit != 'true'
+        run: ci/install-occt.sh "$OCCT_PREFIX"
 
       - name: Configure
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix opencascade);$(brew --prefix vtk)"
+            -DCMAKE_PREFIX_PATH="$OCCT_PREFIX;$(brew --prefix qt);$(brew --prefix vtk)"
 
       - name: Build
         run: cmake --build build --parallel
