@@ -1,0 +1,1 @@
+Checkout setup.md in docs for setup.
