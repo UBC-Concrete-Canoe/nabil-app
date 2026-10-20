@@ -102,7 +102,7 @@ OcctViewport::setupView(WId windowHandle)
 // Embed the view into the Qt widget's native window handle
 #ifdef _WIN32
 	Handle(WNT_Window) wind = new WNT_Window((Aspect_Handle)windowHandle);
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 	Handle(Cocoa_Window) wind = new Cocoa_Window((NSView*)windowHandle);
 #else
 	// Display connection can be found from the graphic driver
