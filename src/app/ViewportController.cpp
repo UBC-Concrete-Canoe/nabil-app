@@ -36,7 +36,10 @@ ViewportController::onResize()
 {
 	if (m_viewport && m_viewport->getView())
 	{
+		// MustBeResized only updates the view's size; without a redraw the old frame
+		// stays on screen, stretched to the new size, until the next interaction.
 		m_viewport->getView()->MustBeResized();
+		m_viewport->getView()->Redraw();
 	}
 }
 
