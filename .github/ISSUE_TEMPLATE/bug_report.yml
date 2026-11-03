@@ -1,0 +1,129 @@
+name: 🐞 Bug report
+description: Something crashes, is broken, or behaves differently than it should.
+title: "[Area] "
+labels: ["bug"]
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! A good report lets someone else reproduce the problem **without needing to ask you questions**, even months from now.
+
+        **Before you start**
+        - Search existing issues (including closed ones) to make sure this hasn't already been reported.
+        - Replace `[Area]` in the title with the affected area and a short summary, e.g. `[Rendering] Hull surface disappears after zooming out`.
+          Areas: `[App]` `[Rendering]` `[Controller]` `[Geometry]` `[Simulation]` `[Data]` `[Collaboration]` `[Build]` `[Docs]`
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the app is affected? "Not sure" is a fine answer.
+      options:
+        - App (menus, inputs, Qt windows and sidebars)
+        - Rendering (3D viewport, viewing windows, camera)
+        - Controller (model state, points/curves/surfaces, user actions)
+        - Geometry (geometry data structures and math, NURBS)
+        - Simulation (hydrostatics, curvature maps, analysis)
+        - Data (save files, SolidWorks and Excel import/export)
+        - Collaboration (version control, shared state)
+        - Build / CI
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How badly does this affect using the app?
+      options:
+        - Critical (crash, data loss, or corrupted hull file)
+        - Major (a feature is broken and there is no workaround)
+        - Minor (something is wrong but there is a workaround)
+        - Cosmetic (visual or text issue only)
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: One or two sentences describing the problem.
+      placeholder: Dragging a control point while zoomed in makes the hull surface flicker and then disappear.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps, starting from launching the app. Someone who has never seen this bug should be able to follow them.
+      placeholder: |
+        1. Launch the app and open any hull file
+        2. Zoom in on the bow until the control points are visible
+        3. Drag one control point upward
+        4. Release the mouse button
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should have happened?
+      placeholder: The hull surface updates smoothly to follow the moved control point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened instead? Include any error messages exactly as shown.
+      placeholder: The surface flickers for about a second and then disappears. No error message is shown.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Run `git rev-parse --short HEAD` in your local copy of the repo, or give the branch name.
+      placeholder: "a1b2c3d (main)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output or logs
+      description: Paste relevant terminal output or log file contents (e.g. `coco.log`). This is formatted as code automatically, so no backticks are needed.
+      render: shell
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Screenshots, recordings, or files
+      description: Drag and drop images, a screen recording, or the hull file that triggers the bug. A file that reproduces the problem is extremely helpful.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this has not been reported yet.
+          required: true
+        - label: I can reproduce this on the latest version of `main`.
+        

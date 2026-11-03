@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ Question or discussion
+    url: https://github.com/UBC-Concrete-Canoe/nabil-app/discussions
+    about: Not sure if something is a bug, or want to talk through an idea first? Ask here.
+    
