@@ -1,0 +1,101 @@
+name: 🛠️ Task
+description: A scoped, agreed-upon piece of work ready to be assigned (implementation, refactor, tooling).
+title: "[Area] "
+type: Task
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A task should be small and clear enough that **a new team member can pick it up and know exactly what "done" means.**
+
+        - Replace `[Area]` in the title with the affected area and a verb-first summary, e.g. `[Rendering] Refactor OCCT widget rendering responsibilities`.
+          Areas: `[App]` `[Rendering]` `[Controller]` `[Geometry]` `[Simulation]` `[Data]` `[Collaboration]` `[Build]` `[Docs]`
+        - If the task is too big to finish in one or two pull requests, split it into sub-issues with the **Create sub-issue** button after creating this one.
+        - Use the sidebar to set the milestone, assignee, and any **Blocked by** relationships.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select all that apply.
+      multiple: true
+      options:
+        - App (menus, inputs, Qt windows and sidebars)
+        - Rendering (3D viewport, viewing windows, camera)
+        - Controller (model state, points/curves/surfaces, user actions)
+        - Geometry (geometry data structures and math, NURBS)
+        - Simulation (hydrostatics, curvature maps, analysis)
+        - Data (save files, SolidWorks and Excel import/export)
+        - Collaboration (version control, shared state)
+        - Build / CI
+        - Docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why does this task exist? Link the feature request or bug it comes from, and explain any background a newcomer would need.
+      placeholder: Part of #27 (Numerical Input). Users need to type exact coordinates for symmetric hull designs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What exactly needs to be done? Name the classes, files, or modules involved where you can.
+      placeholder: |
+        - Create a `PropertySidebar` Qt widget that shows the X, Y, Z of the selected `VisualPoint`
+        - Connect `editingFinished()` to send a `MoveCommand` to the Controller
+        - Grey out the inputs when nothing is selected
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Related things this task deliberately does NOT cover, so it doesn't grow. Optional but recommended.
+      placeholder: Editing multiple selected points at once (separate issue).
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: Checklist that a reviewer will use to confirm the task is complete.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ] Code is reviewed and merged into `main`
+        - [ ] Tests added or updated where applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Technical notes
+      description: Design constraints, proposed approach, diagrams, or gotchas. Markdown and code blocks work here. Optional.
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      description: Rough guess. Helps leads balance workload.
+      options:
+        - Small (a few hours)
+        - Medium (a few days)
+        - Large (a week or more, consider splitting)
+        - Unknown
+
+  - type: dropdown
+    id: good-first
+    attributes:
+      label: Suitable for a new team member?
+      options:
+        - "Yes"
+        - "No"
+        - Not sure
+        
