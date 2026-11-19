@@ -41,18 +41,14 @@ bool MoveTool::onMousePress(int x, int y)
  
     // Find the matching ControlPoint in the model by comparing positions.
     m_selectedPoint = nullptr;
-    for (int u = 0; u < m_model->getUCount(); ++u)
+    for (std::size_t i = 0; i < m_model->pointCount(); ++i)
     {
-        for (int v = 0; v < m_model->getVCount(); ++v)
+        ControlPoint* cp = m_model->pointAt(i);
+        if (cp && cp->getPosition().Distance(vp->point()) < 1e-6)
         {
-            ControlPoint& cp = m_model->getPoint(u, v);
-            if (cp.getPosition().Distance(vp->point()) < 1e-6)
-            {
-                m_selectedPoint = &cp;
-                break;
-            }
+            m_selectedPoint = cp;
+            break;
         }
-        if (m_selectedPoint) break;
     }
  
     if (!m_selectedPoint)
@@ -93,7 +89,8 @@ bool MoveTool::onMouseMove(int x, int y)
         current.Y() + static_cast<double>(delta.y()),
         current.Z() + static_cast<double>(delta.z()));
  
-    m_selectedPoint->setPosition(newPos);
+    // Go through the model so observers (e.g. WireframeManager) are notified.
+    m_model->updatePoint(m_selectedPoint->getId(), newPos);
  
     // Advance the anchor to the new position for the next frame.
     m_dragAnchor = newPos;

@@ -1,4 +1,5 @@
 #include "VisualPoint.h"
+#include "render/OcctStyleMapper.h"
 
 #include <Graphic3d_ArrayOfPoints.hxx>
 #include <Prs3d_Drawer.hxx>
@@ -13,18 +14,23 @@ IMPLEMENT_STANDARD_RTTIEXT(VisualPoint, AIS_InteractiveObject)
 
 namespace
 {
-constexpr Standard_Real kSyncEpsilon = 1.0e-7;
-constexpr Standard_Real kDefaultMarkerScale = 6.0;
-constexpr Standard_Real kSelectedMarkerScale = 8.0;
-}
+constexpr double kSyncEpsilon = 1.0e-7;
+} // namespace
 
-VisualPoint::VisualPoint(const ControlPoint* controlPoint)
+VisualPoint::VisualPoint(const ControlPoint* controlPoint, const ControlPointVisualStyle& style)
   : m_controlPoint(controlPoint)
   , m_cachedPoint(pointFromModel())
+  , m_style(style)
 {
-	SetInfiniteState(Standard_False);
-	SetMutable(Standard_True);
-	SetHilightMode(1);
+	SetInfiniteState(false);
+	SetMutable(true);
+	SetHilightMode(0);
+	const Handle(Prs3d_Drawer) selectedDrawer =
+		OcctStyleMapper::makePointDrawer(m_style.selectedColor, m_style.selectedMarkerScale);
+	const Handle(Prs3d_Drawer) hoverDrawer =
+		OcctStyleMapper::makePointDrawer(m_style.hoverColor, m_style.selectedMarkerScale);
+	SetHilightAttributes(selectedDrawer);
+	SetDynamicHilightAttributes(hoverDrawer);
 }
 
 void
@@ -55,22 +61,29 @@ VisualPoint::setSelectedStyle(bool selected)
 }
 
 void
-VisualPoint::Compute(const Handle(PrsMgr_PresentationManager)&,
-                     const Handle(Prs3d_Presentation)& thePrs,
-                     const Standard_Integer theMode)
+VisualPoint::Compute(
+	const Handle(PrsMgr_PresentationManager) &,
+	const Handle(Prs3d_Presentation) & thePrs,
+	const int theMode
+)
 {
 	thePrs->Clear();
 
 	Handle(Prs3d_PointAspect) pointAspect;
-	if (m_isSelected || theMode == 1)
+	if (m_isSelected)
 	{
 		pointAspect =
-			new Prs3d_PointAspect(Aspect_TOM_POINT, Quantity_NOC_ORANGE, kSelectedMarkerScale);
+			OcctStyleMapper::makePointAspect(m_style.selectedColor, m_style.selectedMarkerScale);
+	}
+	else if (theMode == 1)
+	{
+		pointAspect =
+			OcctStyleMapper::makePointAspect(m_style.hoverColor, m_style.selectedMarkerScale);
 	}
 	else
 	{
 		pointAspect =
-			new Prs3d_PointAspect(Aspect_TOM_POINT, Quantity_NOC_WHITE, kDefaultMarkerScale);
+			OcctStyleMapper::makePointAspect(m_style.defaultColor, m_style.defaultMarkerScale);
 	}
 
 	myDrawer->SetPointAspect(pointAspect);
@@ -82,8 +95,10 @@ VisualPoint::Compute(const Handle(PrsMgr_PresentationManager)&,
 }
 
 void
-VisualPoint::ComputeSelection(const Handle(SelectMgr_Selection)& theSelection,
-                              const Standard_Integer)
+VisualPoint::ComputeSelection(
+	const Handle(SelectMgr_Selection) & theSelection,
+	const int
+)
 {
 	Handle(SelectMgr_EntityOwner) owner = new SelectMgr_EntityOwner(this, 10);
 	Handle(Select3D_SensitivePoint) sensitivePoint =

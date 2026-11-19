@@ -1,5 +1,19 @@
 #include "ViewportController.h"
 
+#include <cmath>
+
+namespace
+{
+NCollection_Vec2<int>
+toNativePixels(const QPointF& pos, qreal devicePixelRatio)
+{
+	const qreal dpr = devicePixelRatio > 0.0 ? devicePixelRatio : 1.0;
+	return NCollection_Vec2<int>(
+		static_cast<int>(std::lround(pos.x() * dpr)), static_cast<int>(std::lround(pos.y() * dpr))
+	);
+}
+} // namespace
+
 ViewportController::ViewportController(OcctViewport* viewport)
   : m_viewport(viewport)
 {
@@ -22,30 +36,19 @@ ViewportController::onResize()
 {
 	if (m_viewport && m_viewport->getView())
 	{
+		// MustBeResized only updates the view's size; without a redraw the old frame
+		// stays on screen, stretched to the new size, until the next interaction.
 		m_viewport->getView()->MustBeResized();
+		m_viewport->getView()->Redraw();
 	}
 }
 
 void
-ViewportController::onMousePressEvent(QMouseEvent* e)
+ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
-	}
-
-    const int x = static_cast<int>(e->position().x());
-	const int y = static_cast<int>(e->position().y());
- 
-	// Let MoveTool attempt point selection first on left-click.
-	// If it claims the event (a VisualPoint was hit), skip rest of function.
-	if (e->button() == Qt::LeftButton && m_moveTool)
-	{
-		if (m_moveTool->onMousePress(x, y))
-		{
-			synchronizeAndFlush();
-			return;
-		}
 	}
 
 	// Map Qt button enum to OCCT enum
@@ -63,32 +66,65 @@ ViewportController::onMousePressEvent(QMouseEvent* e)
 		btn = Aspect_VKeyMouse_MiddleButton;
 	}
 
-	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
+	// Let MoveTool attempt point selection first on left-click.
+	// If it claims the event (a VisualPoint was hit), skip rest of function.
+	if (e->button() == Qt::LeftButton && m_moveTool && m_moveTool->onMousePress(pos.x(), pos.y()))
+	{
+		synchronizeAndFlush();
+		return;
+	}
+
 	if (e->button() == Qt::LeftButton)
 	{
 		m_leftButtonPressed = true;
 		m_leftButtonDragged = false;
 		m_leftPressPos = pos;
+
+		// Planar views can block orbit while still allowing click selection.
+		if (!m_rotationEnabled)
+		{
+			m_viewport->getContext()->MoveTo(
+				pos.x(), pos.y(), m_viewport->getView(), false
+			);
+			synchronizeAndFlush();
+			return;
+		}
 	}
 	PressMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
 	synchronizeAndFlush();
 }
 
 void
-ViewportController::onMouseReleaseEvent(QMouseEvent* e)
+ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-    const int x = static_cast<int>(e->position().x());
-	const int y = static_cast<int>(e->position().y());
- 
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
 	// Notify MoveTool on release so it ends the drag.
 	if (e->button() == Qt::LeftButton && m_moveTool)
 	{
-		m_moveTool->onMouseRelease(x, y);
+		m_moveTool->onMouseRelease(pos.x(), pos.y());
+	}
+
+	if (!m_rotationEnabled && e->button() == Qt::LeftButton)
+	{
+		if (m_leftButtonPressed && !m_leftButtonDragged)
+		{
+			m_viewport->getContext()->MoveTo(
+				pos.x(), pos.y(), m_viewport->getView(), false
+			);
+			m_viewport->getContext()->SelectDetected(AIS_SelectionScheme_Replace);
+		}
+		m_leftButtonPressed = false;
+		m_leftButtonDragged = false;
+		synchronizeAndFlush();
+		return;
 	}
 
 	// Map Qt button enum to OCCT enum
@@ -105,8 +141,6 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e)
 	{
 		btn = Aspect_VKeyMouse_MiddleButton;
 	}
-
-	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
 	ReleaseMouseButton(pos, btn, Aspect_VKeyFlags_NONE, false);
 
 	// Explicit click-selection for AIS objects (e.g., VisualPoint).
@@ -114,7 +148,9 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e)
 	{
 		if (m_leftButtonPressed && !m_leftButtonDragged)
 		{
-			m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), Standard_False);
+			m_viewport->getContext()->MoveTo(
+				pos.x(), pos.y(), m_viewport->getView(), false
+			);
 			m_viewport->getContext()->SelectDetected(AIS_SelectionScheme_Replace);
 		}
 		m_leftButtonPressed = false;
@@ -125,27 +161,24 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e)
 }
 
 void
-ViewportController::onMouseMoveEvent(QMouseEvent* e)
+ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-    const int x = static_cast<int>(e->position().x());
-	const int y = static_cast<int>(e->position().y());
- 
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
 	// If MoveTool is actively dragging a point, let it consume
-	// the event entirely and skip orbit. synchronizeAndFlush() will pick
-	// up the dirty flag set by ControlPoint::setPosition().
-	if (m_moveTool && m_moveTool->onMouseMove(x, y))
+	// the event entirely and skip orbit.
+	if (m_moveTool && m_moveTool->onMouseMove(pos.x(), pos.y()))
 	{
 		synchronizeAndFlush();
 		return;
 	}
 
-	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
-	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), Standard_False);
+	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), false);
 
 	if (m_leftButtonPressed)
 	{
@@ -173,19 +206,24 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e)
 		buttons |= Aspect_VKeyMouse_MiddleButton;
 	}
 
+	if (!m_rotationEnabled)
+	{
+		buttons &= ~Aspect_VKeyMouse_LeftButton;
+	}
+
 	UpdateMousePosition(pos, buttons, Aspect_VKeyFlags_NONE, false);
 	synchronizeAndFlush();
 }
 
 void
-ViewportController::onWheelEvent(QWheelEvent* e)
+ViewportController::onWheelEvent(QWheelEvent* e, qreal devicePixelRatio)
 {
-	if (!m_viewport->getView())
+	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	Graphic3d_Vec2i pos(e->position().x(), e->position().y());
+	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
 	// Convert wheel delta to normalized zoom speed (angleDelta ~ 120 per tick)
 	double delta = e->angleDelta().y() / 8.0 / 15.0;
 
@@ -238,10 +276,13 @@ ViewportController::onKeyEvent(QKeyEvent* e)
 }
 
 void
+ViewportController::setRotationEnabled(bool enabled)
+{
+	m_rotationEnabled = enabled;
+}
+
+void
 ViewportController::setModel(HullModel* model)
 {
-    m_moveTool = std::make_unique<MoveTool>(
-        m_viewport->getContext(),
-        m_viewport->getView(),
-        model);
+	m_moveTool = std::make_unique<MoveTool>(m_viewport->getContext(), m_viewport->getView(), model);
 }

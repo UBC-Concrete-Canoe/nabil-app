@@ -9,6 +9,7 @@
 
 // Inherit from AIS_ViewController to get standard OCCT mouse math (orbit/zoom/pan calculations)
 #include <AIS_ViewController.hxx>
+#include <NCollection_Vec2.hxx>
 
 /**
  * @brief Controller layer for viewport interaction.
@@ -30,25 +31,25 @@ public:
 	 * @brief Handle mouse button press.
 	 * Initiates interaction (rotation, zoom, or pan) based on button.
 	 */
-	void onMousePressEvent(QMouseEvent* e);
+	void onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio);
 
 	/**
 	 * @brief Handle mouse button release.
 	 * Ends the current interaction.
 	 */
-	void onMouseReleaseEvent(QMouseEvent* e);
+	void onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio);
 
 	/**
 	 * @brief Handle mouse movement.
 	 * Updates view transformation while button is held.
 	 */
-	void onMouseMoveEvent(QMouseEvent* e);
+	void onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio);
 
 	/**
 	 * @brief Handle mouse wheel scroll.
 	 * Zooms the view in/out.
 	 */
-	void onWheelEvent(QWheelEvent* e);
+	void onWheelEvent(QWheelEvent* e, qreal devicePixelRatio);
 
 	/**
 	 * @brief Handle keyboard input.
@@ -62,22 +63,29 @@ public:
 	 */
 	void onResize();
 
-    /**
-     * @brief Attach a hull model to enable point picking and dragging.
-     *
-     * Creates the internal MoveTool using the viewport's current AIS context
-     * and view. Must be called after initialize() so the context and view
-     * are valid.
-     *
-     * @param model Hull model whose control points will be selectable and draggable.
-     */
-    void setModel(HullModel* model);
+	/**
+	 * @brief Enable or disable mouse-driven orbit rotation.
+	 * @param enabled False to block left-button orbit while keeping pan/zoom active.
+	 */
+	void setRotationEnabled(bool enabled);
+
+	/**
+	 * @brief Attach a hull model to enable point picking and dragging.
+	 *
+	 * Creates the internal MoveTool using the viewport's current AIS context
+	 * and view. Must be called after initialize() so the context and view
+	 * are valid.
+	 *
+	 * @param model Hull model whose control points will be selectable and draggable.
+	 */
+	void setModel(HullModel* model);
 
 private:
 	void synchronizeAndFlush();
 	bool m_leftButtonPressed = false;
 	bool m_leftButtonDragged = false;
-	Graphic3d_Vec2i m_leftPressPos = Graphic3d_Vec2i(0, 0);
+	NCollection_Vec2<int> m_leftPressPos = NCollection_Vec2<int>(0, 0);
 	OcctViewport* m_viewport;
-    std::unique_ptr<MoveTool> m_moveTool;
+	bool m_rotationEnabled = true;
+	std::unique_ptr<MoveTool> m_moveTool;
 };

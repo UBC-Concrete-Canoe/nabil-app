@@ -7,3 +7,4 @@ CMakeLists.txt.user
 # Direnv files from linux, currently specific to NixOS so ignoring for now
 .direnv
 .envrc
+.clangd

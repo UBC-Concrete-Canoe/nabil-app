@@ -4,5 +4,7 @@
         <file>../../assets/wiremesh.png</file>
         <file>../../assets/redcircle.png</file>
         <file>../../assets/layers.png</file>
+        <file alias="maximize.png">../../assets/maximize.png</file>
+        <file alias="restore.png">../../assets/restore.png</file>
     </qresource>
 </RCC>
