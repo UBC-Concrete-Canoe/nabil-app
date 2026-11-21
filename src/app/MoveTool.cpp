@@ -1,5 +1,7 @@
 #include "app/MoveTool.h"
 
+#include <cmath>
+
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <Graphic3d_Vec3.hxx>
 #include <SelectMgr_EntityOwner.hxx>
@@ -102,8 +104,10 @@ bool MoveTool::onMouseMove(int x, int y)
 
 void MoveTool::onMouseRelease(int x, int y)
 {
-    if (m_mode == Mode::Move)
-        m_mode = Mode::Select;
+    // Drop the point: return to View so plain mouse motion no longer drags it.
+    // The OCCT selection highlight is left in place by the context.
+    m_mode = Mode::View;
+    m_selectedPoint = nullptr;
     // if (std::abs(m_accumulated.x()) > kEpsilon ||
     //     std::abs(m_accumulated.y()) > kEpsilon ||
     //     std::abs(m_accumulated.z()) > kEpsilon)

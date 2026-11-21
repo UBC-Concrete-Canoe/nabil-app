@@ -24,6 +24,10 @@ VisualPoint::VisualPoint(const ControlPoint* controlPoint, const ControlPointVis
 {
 	SetInfiniteState(false);
 	SetMutable(true);
+	// Hover/selected looks are drawn by Compute() from m_isHovered/m_isSelected.
+	// OCCT's automatic highlight colour override leaked onto every other point
+	// in the planar views, so it is disabled for control points.
+	SetAutoHilight(false);
 	SetHilightMode(0);
 	const Handle(Prs3d_Drawer) selectedDrawer =
 		OcctStyleMapper::makePointDrawer(m_style.selectedColor, m_style.selectedMarkerScale);
@@ -60,6 +64,19 @@ VisualPoint::setSelectedStyle(bool selected)
 	return true;
 }
 
+bool
+VisualPoint::setHoveredStyle(bool hovered)
+{
+	if (m_isHovered == hovered)
+	{
+		return false;
+	}
+
+	m_isHovered = hovered;
+	SetToUpdate();
+	return true;
+}
+
 void
 VisualPoint::Compute(
 	const Handle(PrsMgr_PresentationManager) &,
@@ -69,23 +86,20 @@ VisualPoint::Compute(
 {
 	thePrs->Clear();
 
-	Handle(Prs3d_PointAspect) pointAspect;
+	RgbColor color = m_style.defaultColor;
+	double scale = m_style.defaultMarkerScale;
 	if (m_isSelected)
 	{
-		pointAspect =
-			OcctStyleMapper::makePointAspect(m_style.selectedColor, m_style.selectedMarkerScale);
+		color = m_style.selectedColor;
+		scale = m_style.selectedMarkerScale;
 	}
-	else if (theMode == 1)
+	else if (m_isHovered || theMode == 1)
 	{
-		pointAspect =
-			OcctStyleMapper::makePointAspect(m_style.hoverColor, m_style.selectedMarkerScale);
-	}
-	else
-	{
-		pointAspect =
-			OcctStyleMapper::makePointAspect(m_style.defaultColor, m_style.defaultMarkerScale);
+		color = m_style.hoverColor;
+		scale = m_style.selectedMarkerScale;
 	}
 
+	Handle(Prs3d_PointAspect) pointAspect = OcctStyleMapper::makePointAspect(color, scale);
 	myDrawer->SetPointAspect(pointAspect);
 	thePrs->CurrentGroup()->SetGroupPrimitivesAspect(pointAspect->Aspect());
 
@@ -100,9 +114,14 @@ VisualPoint::ComputeSelection(
 	const int
 )
 {
-	Handle(SelectMgr_EntityOwner) owner = new SelectMgr_EntityOwner(this, 10);
+	// Reuse one owner: a fresh owner per recompute would drop the selection
+	// every time the point is redisplayed (e.g. when its selected style changes).
+	if (m_owner.IsNull())
+	{
+		m_owner = new SelectMgr_EntityOwner(this, 10);
+	}
 	Handle(Select3D_SensitivePoint) sensitivePoint =
-		new Select3D_SensitivePoint(owner, m_cachedPoint);
+		new Select3D_SensitivePoint(m_owner, m_cachedPoint);
 	theSelection->Add(sensitivePoint);
 }
 

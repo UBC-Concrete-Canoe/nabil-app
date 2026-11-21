@@ -73,6 +73,8 @@ public:
 
     Mode mode()          const { return m_mode; }
     bool hasSelection()  const { return m_selectedPoint != nullptr; }
+    //! True between a press that picked a point and the matching release.
+    bool isActive()      const { return m_mode != Mode::View && m_selectedPoint != nullptr; }
 
 private:
     /**

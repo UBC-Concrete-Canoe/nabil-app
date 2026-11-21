@@ -80,6 +80,18 @@ public:
 	 */
 	void setModel(HullModel* model);
 
+	/**
+	 * @brief Scale from Qt logical widget coordinates to OCCT window coordinates.
+	 *
+	 * OCCT's window may be sized in logical points (e.g. macOS Cocoa) or in
+	 * physical pixels (e.g. Windows/X11 high-DPI), so derive the factor from the
+	 * actual OCCT window width instead of assuming the device pixel ratio.
+	 *
+	 * @param logicalWidth Widget width in Qt logical units.
+	 * @param devicePixelRatio Fallback when the OCCT window size is unavailable.
+	 */
+	qreal inputScale(int logicalWidth, qreal devicePixelRatio) const;
+
 private:
 	void synchronizeAndFlush();
 	bool m_leftButtonPressed = false;
