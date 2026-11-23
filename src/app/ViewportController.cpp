@@ -67,6 +67,15 @@ ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 	}
 
 	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
+	// Let MoveTool attempt point selection first on left-click.
+	// If it claims the event (a VisualPoint was hit), skip rest of function.
+	if (e->button() == Qt::LeftButton && m_moveTool && m_moveTool->onMousePress(pos.x(), pos.y()))
+	{
+		synchronizeAndFlush();
+		return;
+	}
+
 	if (e->button() == Qt::LeftButton)
 	{
 		m_leftButtonPressed = true;
@@ -96,6 +105,12 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
 	}
 
 	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
+	// Notify MoveTool on release so it ends the drag.
+	if (e->button() == Qt::LeftButton && m_moveTool)
+	{
+		m_moveTool->onMouseRelease(pos.x(), pos.y());
+	}
 
 	if (!m_rotationEnabled && e->button() == Qt::LeftButton)
 	{
@@ -154,6 +169,22 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
 	}
 
 	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+
+	// While MoveTool holds a picked point, it owns the left-drag and orbit is skipped.
+	if (m_moveTool && m_moveTool->isActive())
+	{
+		if (e->buttons() & Qt::LeftButton)
+		{
+			m_moveTool->onMouseMove(pos.x(), pos.y());
+			synchronizeAndFlush();
+			return;
+		}
+
+		// The left button is no longer held but no release reached us (e.g. it
+		// happened outside the window), so end the drag here.
+		m_moveTool->onMouseRelease(pos.x(), pos.y());
+	}
+
 	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), false);
 
 	if (m_leftButtonPressed)
@@ -255,4 +286,27 @@ void
 ViewportController::setRotationEnabled(bool enabled)
 {
 	m_rotationEnabled = enabled;
+}
+
+void
+ViewportController::setModel(HullModel* model)
+{
+	m_moveTool = std::make_unique<MoveTool>(m_viewport->getContext(), m_viewport->getView(), model);
+}
+
+qreal
+ViewportController::inputScale(int logicalWidth, qreal devicePixelRatio) const
+{
+	if (m_viewport && m_viewport->getView() && !m_viewport->getView()->Window().IsNull()
+		&& logicalWidth > 0)
+	{
+		int windowWidth = 0;
+		int windowHeight = 0;
+		m_viewport->getView()->Window()->Size(windowWidth, windowHeight);
+		if (windowWidth > 0)
+		{
+			return static_cast<qreal>(windowWidth) / static_cast<qreal>(logicalWidth);
+		}
+	}
+	return devicePixelRatio;
 }

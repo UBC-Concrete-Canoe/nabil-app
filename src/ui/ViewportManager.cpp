@@ -138,5 +138,11 @@ ViewportManager::create_demo_hull_model()
 	demo_wireframe_manager =
 		std::make_unique<WireframeManager>(persp_viewport->getContext(), demo_hull_model);
 	demo_wireframe_manager->build();
+
+	// Enable point picking and dragging in every viewport.
+	persp_controller->setModel(demo_hull_model.get());
+	plan_controller->setModel(demo_hull_model.get());
+	profile_controller->setModel(demo_hull_model.get());
+	bodyplan_controller->setModel(demo_hull_model.get());
 	persp_viewport->fitAll();
 }

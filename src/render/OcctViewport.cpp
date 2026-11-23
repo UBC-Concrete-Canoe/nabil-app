@@ -260,6 +260,8 @@ bool
 OcctViewport::updateVisualPointSelectionStyles()
 {
 	bool anyUpdated = false;
+	const Handle(AIS_InteractiveObject) hovered =
+		myContext->HasDetected() ? myContext->DetectedInteractive() : Handle(AIS_InteractiveObject)();
 
 	for (const Handle(VisualPoint) & point : *myVisualPoints)
 	{
@@ -268,10 +270,11 @@ OcctViewport::updateVisualPointSelectionStyles()
 			continue;
 		}
 
-		const bool isSelected = myContext->IsSelected(point);
-		if (point->setSelectedStyle(isSelected))
+		const bool selectedChanged = point->setSelectedStyle(myContext->IsSelected(point));
+		const bool hoveredChanged = point->setHoveredStyle(point == hovered);
+		if (selectedChanged || hoveredChanged)
 		{
-			myContext->Redisplay(point, false);
+			myContext->RecomputePrsOnly(point, false);
 			anyUpdated = true;
 		}
 	}
