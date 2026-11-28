@@ -38,6 +38,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent* e) override;
 	void wheelEvent(QWheelEvent* e) override;
 	void keyPressEvent(QKeyEvent* e) override;
+	void focusOutEvent(QFocusEvent* e) override;
 
 private:
 	ViewportController* m_controller = nullptr;

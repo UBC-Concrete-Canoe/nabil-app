@@ -1,5 +1,6 @@
 #include "OcctWidget.h"
 #include "app/ViewportController.h"
+#include <QFocusEvent>
 
 OcctWidget::OcctWidget(QWidget* parent)
   : QWidget(parent)
@@ -77,4 +78,15 @@ OcctWidget::keyPressEvent(QKeyEvent* e)
 		m_controller->onKeyEvent(e);
 		update();
 	}
+}
+
+void
+OcctWidget::focusOutEvent(QFocusEvent* e)
+{
+	if (m_controller)
+	{
+		m_controller->cancelActiveDrag();
+	}
+	QWidget::focusOutEvent(e);
+
 }
