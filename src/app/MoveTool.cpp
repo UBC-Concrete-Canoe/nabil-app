@@ -1,6 +1,7 @@
 #include "app/MoveTool.h"
 
 #include <cmath>
+#include <stdexcept>
 
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <Graphic3d_Vec3.hxx>
@@ -25,8 +26,7 @@ bool MoveTool::onMousePress(int x, int y)
     if (!m_context->MoreSelected())
     {
         m_context->ClearSelected(Standard_True);
-        m_selectedPoint = nullptr;
-        m_mode = Mode::View;
+        clearDragState();
         return false;
     }
 
@@ -36,78 +36,23 @@ bool MoveTool::onMousePress(int x, int y)
     if (vp.IsNull())
     {
         // Clicked something that isn't a VisualPoint - ignore.
-        m_selectedPoint = nullptr;
-        m_mode = Mode::View;
+        clearDragState();
         return false;
     }
- 
-    // Find the matching ControlPoint in the model by comparing positions.
-    m_selectedPoint = nullptr;
-    for (std::size_t i = 0; i < m_model->pointCount(); ++i)
-    {
-        ControlPoint* cp = m_model->pointAt(i);
-        if (cp && cp->getPosition().Distance(vp->point()) < 1e-6)
-        {
-            m_selectedPoint = cp;
-            break;
-        }
-    }
- 
-    if (!m_selectedPoint)
-    {
-        m_mode = Mode::View;
-        return false;
-    }
- 
-    m_mode = Mode::Select;
-    m_lastX = x;
-    m_lastY = y;
-    m_dragAnchor = m_selectedPoint->getPosition();
- 
-    return true;  // suppress orbit
+
+    // The visual owns the exact model identity, so coincident points do not
+    // need to be disambiguated by comparing their coordinates.
+    return beginDrag(vp->modelPointId(), {x, y});
 }
 
 bool MoveTool::onMouseMove(int x, int y)
 {
-    if (m_mode == Mode::View || !m_selectedPoint)
-        return false;
-
-    if (m_mode == Mode::Select)
-        m_mode = Mode::Move;
-
-    // Project previous and current screen positions onto the camera-facing
-    // plane through the drag anchor. Graphic3d_Vec3 carries the world coords.
-    Graphic3d_Vec3 prev = projectOntoPlane(m_lastX, m_lastY, m_dragAnchor);
-    Graphic3d_Vec3 curr = projectOntoPlane(x, y, m_dragAnchor);
-
-    // Per-frame delta as a Graphic3d_Vec3.
-    Graphic3d_Vec3 delta(curr.x() - prev.x(),
-                         curr.y() - prev.y(),
-                         curr.z() - prev.z());
-
-    const gp_Pnt& current = m_selectedPoint->getPosition();
-    gp_Pnt newPos(
-        current.X() + static_cast<double>(delta.x()),
-        current.Y() + static_cast<double>(delta.y()),
-        current.Z() + static_cast<double>(delta.z()));
- 
-    // Go through the model so observers (e.g. WireframeManager) are notified.
-    m_model->updatePoint(m_selectedPoint->getId(), newPos);
- 
-    // Advance the anchor to the new position for the next frame.
-    m_dragAnchor = newPos;
-    m_lastX      = x;
-    m_lastY      = y;
- 
-    return true;  // suppress orbit
+    return updateDrag({x, y});
 }
 
 void MoveTool::onMouseRelease(int x, int y)
 {
-    // Drop the point: return to View so plain mouse motion no longer drags it.
-    // The OCCT selection highlight is left in place by the context.
-    m_mode = Mode::View;
-    m_selectedPoint = nullptr;
+    finishDrag({x, y});
     // if (std::abs(m_accumulated.x()) > kEpsilon ||
     //     std::abs(m_accumulated.y()) > kEpsilon ||
     //     std::abs(m_accumulated.z()) > kEpsilon)
@@ -127,6 +72,159 @@ void MoveTool::onMouseRelease(int x, int y)
     //     while (!m_redoStack.empty())
     //         m_redoStack.pop();
     // }
+}
+
+bool MoveTool::beginDrag(int pointId, ScreenPoint screenPosition)
+{
+    if (isActive() || m_model == nullptr || m_view.IsNull())
+    {
+        return false;
+    }
+
+    try
+    {
+        m_dragStartModelPosition = m_model->point(pointId).getPosition();
+    }
+    catch (const std::out_of_range&)
+    {
+        clearDragState();
+        return false;
+    }
+
+    m_activePointId = pointId;
+    m_mode = Mode::Select;
+
+    // Keep the actual press location as the first screen-space sample. A point
+    // may be picked anywhere within its selection tolerance, so deriving this
+    // from the point's visual centre could introduce a jump on the first move.
+    m_previousScreenPosition = screenPosition;
+
+    // Projection still needs a 3D model-space anchor, which starts at the
+    // point position captured for cancellation.
+    m_projectionAnchor = m_dragStartModelPosition;
+
+    return true;
+}
+
+bool MoveTool::updateDrag(ScreenPoint screenPosition)
+{
+    if (!isActive() || m_model == nullptr)
+    {
+        return false;
+    }
+
+    if (m_mode == Mode::Select)
+    {
+        m_mode = Mode::Move;
+    }
+
+    // Project consecutive cursor samples onto the camera-facing plane through
+    // the current projection anchor. Graphic3d_Vec3 carries world coordinates.
+    Graphic3d_Vec3 previousProjectedPosition = projectOntoPlane(
+        m_previousScreenPosition.x, m_previousScreenPosition.y, m_projectionAnchor);
+    Graphic3d_Vec3 currentProjectedPosition = projectOntoPlane(
+        screenPosition.x, screenPosition.y, m_projectionAnchor);
+
+    // Per-frame delta as a Graphic3d_Vec3.
+    Graphic3d_Vec3 worldDelta(
+        currentProjectedPosition.x() - previousProjectedPosition.x(),
+        currentProjectedPosition.y() - previousProjectedPosition.y(),
+        currentProjectedPosition.z() - previousProjectedPosition.z());
+
+    gp_Pnt currentModelPosition;
+    try
+    {
+        // Resolve by stable ID for each update instead of retaining a pointer
+        // to model-owned point storage for the lifetime of the drag.
+        currentModelPosition = m_model->point(*m_activePointId).getPosition();
+    }
+    catch (const std::out_of_range&)
+    {
+        clearDragState();
+        return false;
+    }
+
+    gp_Pnt updatedModelPosition(
+        currentModelPosition.X() + static_cast<double>(worldDelta.x()),
+        currentModelPosition.Y() + static_cast<double>(worldDelta.y()),
+        currentModelPosition.Z() + static_cast<double>(worldDelta.z()));
+
+    // Go through the model so observers (e.g. WireframeManager) are notified.
+    m_model->updatePoint(*m_activePointId, updatedModelPosition);
+
+    // Advance the anchor to the new position for the next frame.
+    m_projectionAnchor = updatedModelPosition;
+    m_previousScreenPosition = screenPosition;
+
+    return true;  // suppress orbit
+}
+
+std::optional<MoveResult> MoveTool::finishDrag(ScreenPoint screenPosition)
+{
+    if (!isActive() || m_model == nullptr)
+    {
+        return std::nullopt;
+    }
+
+    // A release can arrive at a position not delivered by mouseMoveEvent, so
+    // apply that final cursor sample before recording the completed movement.
+    if (screenPosition.x != m_previousScreenPosition.x
+        || screenPosition.y != m_previousScreenPosition.y)
+    {
+        updateDrag(screenPosition);
+    }
+
+    if (!isActive())
+    {
+        return std::nullopt;
+    }
+
+    const int completedPointId = *m_activePointId;
+    gp_Pnt finalModelPosition;
+    try
+    {
+        finalModelPosition = m_model->point(completedPointId).getPosition();
+    }
+    catch (const std::out_of_range&)
+    {
+        clearDragState();
+        return std::nullopt;
+    }
+
+    MoveResult completedMove{
+        completedPointId, m_dragStartModelPosition, finalModelPosition};
+    clearDragState();
+    return completedMove;
+}
+
+bool MoveTool::cancelDrag()
+{
+    if (!isActive() || m_model == nullptr)
+    {
+        return false;
+    }
+
+    try
+    {
+        // Restore through HullModel so renderers and other observers receive
+        // the same movement notification as they do during an ordinary drag.
+        m_model->updatePoint(*m_activePointId, m_dragStartModelPosition);
+    }
+    catch (const std::out_of_range&)
+    {
+        clearDragState();
+        return false;
+    }
+
+    clearDragState();
+    return true;
+}
+
+void MoveTool::clearDragState()
+{
+    // OCCT selection is intentionally left intact; only movement ownership ends.
+    m_mode = Mode::View;
+    m_activePointId.reset();
 }
 
 // void MoveTool::undo()
@@ -151,7 +249,8 @@ void MoveTool::onMouseRelease(int x, int y)
 //     m_redoStack.pop();
 // }
 
-Graphic3d_Vec3 MoveTool::projectOntoPlane(int x, int y, const gp_Pnt& anchor) const
+Graphic3d_Vec3 MoveTool::projectOntoPlane(
+    int x, int y, const gp_Pnt& projectionAnchor) const
 {
     // Shoot a ray from the camera through the screen pixel.
     Standard_Real xv, yv, zv, vx, vy, vz;
@@ -159,11 +258,12 @@ Graphic3d_Vec3 MoveTool::projectOntoPlane(int x, int y, const gp_Pnt& anchor) co
     gp_Pnt rayOrigin(xv, yv, zv);
     gp_Dir rayDir(vx, vy, vz);
 
-    // Plane through `anchor`, normal = camera direction (faces the viewer).
+    // Plane through the projection anchor, normal = camera direction.
     gp_Dir camDir = m_view->Camera()->Direction();
     gp_Vec n(camDir);
     gp_Vec orig(rayOrigin.X(), rayOrigin.Y(), rayOrigin.Z());
-    gp_Vec anchorVec(anchor.X(), anchor.Y(), anchor.Z());
+    gp_Vec anchorVec(
+        projectionAnchor.X(), projectionAnchor.Y(), projectionAnchor.Z());
 
     // Ray-plane intersection: t = (n · (anchor - origin)) / (n · dir)
     double denom = n.Dot(gp_Vec(rayDir));
