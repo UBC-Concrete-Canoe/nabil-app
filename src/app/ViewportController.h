@@ -58,6 +58,12 @@ public:
 	void onKeyEvent(QKeyEvent* e);
 
 	/**
+	 * @brief Cancel an active point drag and restore its starting position.
+	 * @return true when a drag was cancelled.
+	 */
+	bool cancelActiveDrag();
+
+	/**
 	 * @brief Handle window resize.
 	 * Notifies the view of geometry changes.
 	 */

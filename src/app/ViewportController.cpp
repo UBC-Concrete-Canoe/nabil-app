@@ -241,6 +241,14 @@ ViewportController::onWheelEvent(QWheelEvent* e, qreal devicePixelRatio)
 void
 ViewportController::onKeyEvent(QKeyEvent* e)
 {
+	if (e->key() == Qt::Key_Escape)
+	{
+		// Escape only cancels point movement; it should not fall through to
+		// unrelated viewport shortcuts after restoring the model position.
+		cancelActiveDrag();
+		return;
+	}
+
 	switch (e->key())
 	{
 		case Qt::Key_F:
@@ -280,6 +288,22 @@ ViewportController::onKeyEvent(QKeyEvent* e)
 	}
 
 	synchronizeAndFlush();
+}
+
+bool
+ViewportController::cancelActiveDrag()
+{
+	if (!m_moveTool || !m_moveTool->cancelDrag())
+	{
+		return false;
+	}
+
+	// Clear controller-side pointer state as well as MoveTool state so the next
+	// mouse sequence starts normally after cancellation.
+	m_leftButtonPressed = false;
+	m_leftButtonDragged = false;
+	synchronizeAndFlush();
+	return true;
 }
 
 void

@@ -19,6 +19,7 @@ constexpr double kSyncEpsilon = 1.0e-7;
 
 VisualPoint::VisualPoint(const ControlPoint* controlPoint, const ControlPointVisualStyle& style)
   : m_controlPoint(controlPoint)
+  , m_modelPointId(controlPoint != nullptr ? controlPoint->getId() : -1)
   , m_cachedPoint(pointFromModel())
   , m_style(style)
 {

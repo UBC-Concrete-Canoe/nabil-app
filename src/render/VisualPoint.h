@@ -57,6 +57,11 @@ public:
 	 */
 	const gp_Pnt& point() const { return m_cachedPoint; }
 
+	/**
+	 * @brief Get the stable identifier of the backing model point.
+	 */
+	int modelPointId() const { return m_modelPointId; }
+
 	//! @name OCCT self-highlighting hooks
 	//! Auto-highlight is disabled, so OCCT calls these instead; the base
 	//! implementations throw. Styling is handled by Compute(), so they are no-ops.
@@ -106,6 +111,7 @@ private:
 	bool hasMoved(const gp_Pnt& p) const;
 
 	const ControlPoint* m_controlPoint = nullptr;
+	int m_modelPointId = -1;
 	//! Selection owner reused across selection recomputes so the context's
 	//! selected state survives Redisplay()/UpdateSelection().
 	Handle(SelectMgr_EntityOwner) m_owner;
