@@ -1,4 +1,5 @@
 #include "OcctViewport.h"
+#include "CocoGraphicDriver.h"
 #include "core/ControlPoint.h"
 #include "render/OcctStyleMapper.h"
 #include "render/VisualPoint.h"
@@ -35,7 +36,7 @@ OcctViewport::initialize(WId windowHandle)
 {
 	// Create the graphics driver and viewer
 	Handle(Aspect_DisplayConnection) displayConnection = new Aspect_DisplayConnection();
-	Handle(OpenGl_GraphicDriver) graphicDriver = new OpenGl_GraphicDriver(displayConnection);
+	Handle(OpenGl_GraphicDriver) graphicDriver = new CocoGraphicDriver(displayConnection);
 	myViewer = new V3d_Viewer(graphicDriver);
 
 	// Set up directional and ambient lighting
