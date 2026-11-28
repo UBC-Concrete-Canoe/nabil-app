@@ -18,6 +18,12 @@
 class ViewportController : public AIS_ViewController
 {
 public:
+	struct InputScale
+	{
+		qreal x = 1.0;
+		qreal y = 1.0;
+	};
+
 	/**
 	 * @brief Constructor.
 	 * @param viewport The viewport this controller will manipulate (ownership with caller)
@@ -28,25 +34,25 @@ public:
 	 * @brief Handle mouse button press.
 	 * Initiates interaction (rotation, zoom, or pan) based on button.
 	 */
-	void onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio);
+	void onMousePressEvent(QMouseEvent* e, const InputScale& scale);
 
 	/**
 	 * @brief Handle mouse button release.
 	 * Ends the current interaction.
 	 */
-	void onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio);
+	void onMouseReleaseEvent(QMouseEvent* e, const InputScale& scale);
 
 	/**
 	 * @brief Handle mouse movement.
 	 * Updates view transformation while button is held.
 	 */
-	void onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio);
+	void onMouseMoveEvent(QMouseEvent* e, const InputScale& scale);
 
 	/**
 	 * @brief Handle mouse wheel scroll.
 	 * Zooms the view in/out.
 	 */
-	void onWheelEvent(QWheelEvent* e, qreal devicePixelRatio);
+	void onWheelEvent(QWheelEvent* e, const InputScale& scale);
 
 	/**
 	 * @brief Handle keyboard input.
@@ -65,6 +71,16 @@ public:
 	 * @param enabled False to block left-button orbit while keeping pan/zoom active.
 	 */
 	void setRotationEnabled(bool enabled);
+
+	/**
+	 * @brief Calculate the conversion from Qt widget coordinates to OCCT
+	 * render-window coordinates.
+	 */
+	InputScale inputScale(
+		int widgetWidth,
+		int widgetHeight,
+		qreal fallbackScale
+	) const;
 
 private:
 	void synchronizeAndFlush();
