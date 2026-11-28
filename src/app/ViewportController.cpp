@@ -154,7 +154,7 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
 	}
 
 	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
-	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), false);
+	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), true);
 
 	if (m_leftButtonPressed)
 	{
