@@ -37,6 +37,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/ViewportManager.cpp
     src/core/HullModel.cpp
     src/render/OcctViewport.cpp
+    src/render/CocoGraphicDriver.cpp
     src/render/VisualPoint.cpp
     src/render/WireframeManager.cpp
     

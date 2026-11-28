@@ -5,11 +5,11 @@
 namespace
 {
 NCollection_Vec2<int>
-toNativePixels(const QPointF& pos, qreal devicePixelRatio)
+toOcctPixels(const QPointF& pos, const ViewportController::InputScale& scale)
 {
-	const qreal dpr = devicePixelRatio > 0.0 ? devicePixelRatio : 1.0;
 	return NCollection_Vec2<int>(
-		static_cast<int>(std::lround(pos.x() * dpr)), static_cast<int>(std::lround(pos.y() * dpr))
+		static_cast<int>(std::lround(pos.x() * scale.x)),
+		static_cast<int>(std::lround(pos.y() * scale.y))
 	);
 }
 } // namespace
@@ -44,7 +44,7 @@ ViewportController::onResize()
 }
 
 void
-ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
+ViewportController::onMousePressEvent(QMouseEvent* e, const InputScale& scale)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
@@ -66,7 +66,7 @@ ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 		btn = Aspect_VKeyMouse_MiddleButton;
 	}
 
-	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toOcctPixels(e->position(), scale);
 	if (e->button() == Qt::LeftButton)
 	{
 		m_leftButtonPressed = true;
@@ -88,14 +88,14 @@ ViewportController::onMousePressEvent(QMouseEvent* e, qreal devicePixelRatio)
 }
 
 void
-ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
+ViewportController::onMouseReleaseEvent(QMouseEvent* e, const InputScale& scale)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toOcctPixels(e->position(), scale);
 
 	if (!m_rotationEnabled && e->button() == Qt::LeftButton)
 	{
@@ -146,14 +146,14 @@ ViewportController::onMouseReleaseEvent(QMouseEvent* e, qreal devicePixelRatio)
 }
 
 void
-ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
+ViewportController::onMouseMoveEvent(QMouseEvent* e, const InputScale& scale)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toOcctPixels(e->position(), scale);
 	m_viewport->getContext()->MoveTo(pos.x(), pos.y(), m_viewport->getView(), false);
 
 	if (m_leftButtonPressed)
@@ -192,14 +192,14 @@ ViewportController::onMouseMoveEvent(QMouseEvent* e, qreal devicePixelRatio)
 }
 
 void
-ViewportController::onWheelEvent(QWheelEvent* e, qreal devicePixelRatio)
+ViewportController::onWheelEvent(QWheelEvent* e, const InputScale& scale)
 {
 	if (!m_viewport || !m_viewport->getView())
 	{
 		return;
 	}
 
-	NCollection_Vec2<int> pos = toNativePixels(e->position(), devicePixelRatio);
+	NCollection_Vec2<int> pos = toOcctPixels(e->position(), scale);
 	// Convert wheel delta to normalized zoom speed (angleDelta ~ 120 per tick)
 	double delta = e->angleDelta().y() / 8.0 / 15.0;
 
@@ -255,4 +255,33 @@ void
 ViewportController::setRotationEnabled(bool enabled)
 {
 	m_rotationEnabled = enabled;
+}
+
+ViewportController::InputScale
+ViewportController::inputScale(
+	int widgetWidth,
+	int widgetHeight,
+	qreal fallbackScale
+) const
+{
+	const qreal fallback = fallbackScale > 0.0 ? fallbackScale : 1.0;
+	if (!m_viewport || !m_viewport->getView()
+		|| m_viewport->getView()->Window().IsNull()
+		|| widgetWidth <= 0 || widgetHeight <= 0)
+	{
+		return {fallback, fallback};
+	}
+
+	int occtWidth = 0;
+	int occtHeight = 0;
+	m_viewport->getView()->Window()->Size(occtWidth, occtHeight);
+	if (occtWidth <= 0 || occtHeight <= 0)
+	{
+		return {fallback, fallback};
+	}
+
+	return {
+		static_cast<qreal>(occtWidth) / static_cast<qreal>(widgetWidth),
+		static_cast<qreal>(occtHeight) / static_cast<qreal>(widgetHeight)
+	};
 }

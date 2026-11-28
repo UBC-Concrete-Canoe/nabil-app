@@ -34,7 +34,8 @@ OcctWidget::mousePressEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMousePressEvent(e, devicePixelRatioF());
+		const auto scale = m_controller->inputScale(width(), height(), devicePixelRatioF());
+		m_controller->onMousePressEvent(e, scale);
 		update();
 	}
 }
@@ -44,7 +45,8 @@ OcctWidget::mouseMoveEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMouseMoveEvent(e, devicePixelRatioF());
+		const auto scale = m_controller->inputScale(width(), height(), devicePixelRatioF());
+		m_controller->onMouseMoveEvent(e, scale);
 		update();
 	}
 }
@@ -54,7 +56,8 @@ OcctWidget::mouseReleaseEvent(QMouseEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onMouseReleaseEvent(e, devicePixelRatioF());
+		const auto scale = m_controller->inputScale(width(), height(), devicePixelRatioF());
+		m_controller->onMouseReleaseEvent(e, scale);
 		update();
 	}
 }
@@ -64,7 +67,8 @@ OcctWidget::wheelEvent(QWheelEvent* e)
 {
 	if (m_controller)
 	{
-		m_controller->onWheelEvent(e, devicePixelRatioF());
+		const auto scale = m_controller->inputScale(width(), height(), devicePixelRatioF());
+		m_controller->onWheelEvent(e, scale);
 		update();
 	}
 }
